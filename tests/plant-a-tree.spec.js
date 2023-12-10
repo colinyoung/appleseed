@@ -16,8 +16,9 @@ const requests = fs
   .split("\n")
   .map((line) => {
     const [houseNumber, street, numTrees, description] = line.split(",");
+    const address = `${houseNumber.trim()} ${street ? street.trim() : ""}`.trim();
     return {
-      address: `${houseNumber.trim()} ${street.trim()}`,
+      address,
       numTrees: numTrees ? parseInt(numTrees) : undefined,
       description,
     };
@@ -25,9 +26,12 @@ const requests = fs
 
 
 test("test", async ({ page }) => {
+  let i = 0;
   for (const { address, numTrees = 1, description } of requests) {
+    i++;
+    if (!address.trim()) break;
     // Make sure tsv file doens't contain address
-    console.log(`Planting ${numTrees} ${numTrees > 1 ? "trees" : "tree"} at ${address}`);
+    console.log(`Planting ${numTrees} ${numTrees > 1 ? "trees" : "tree"} at ${address}. ${description ? `Description: ${description}` : ""}`); 
     if (fs.readFileSync(filename, "utf8").includes(address)) {
       console.log(`Skipping ${address}`)
       continue;
@@ -70,6 +74,7 @@ test("test", async ({ page }) => {
     if (innerText) {
       // @ts-ignore
       const srNumber = innerText.split(" ").pop().replace(".", "");
+      console.log('Planted! SR# Number: ', srNumber);
       try {
         fs.readFileSync(filename, "utf8").startsWith("SR Number");
       } catch (e) {
@@ -78,6 +83,7 @@ test("test", async ({ page }) => {
       const date = new Date().toLocaleString();
       fs.appendFileSync(filename, `${srNumber},${address},${date},${numTrees}\n`);
     }
+    console.log(requests.length - i, "requests left");
     await delay(randomDelay); // <-- here we wait 3s
   }
 });
