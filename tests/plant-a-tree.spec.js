@@ -10,112 +10,24 @@ const randomDelay = Math.floor(Math.random() * (maxDelay - 500 + 1) + minDelay);
 
 const filename = "./srNumbers.csv";
 
-// const address = "2851 S KEELEY";
-// const numTrees = 1;
+// parse csv file 'trees-to-plant.csv' into array
+const requests = fs
+  .readFileSync("./trees-to-plant.csv", "utf8")
+  .split("\n")
+  .map((line) => {
+    const [houseNumber, street, numTrees, description] = line.split(",");
+    return {
+      address: `${houseNumber.trim()} ${street.trim()}`,
+      numTrees: numTrees ? parseInt(numTrees) : undefined,
+      description,
+    };
+  });
 
-const requests = [
-  {
-    address: "2826 S KEELEY",
-    numTrees: 1,
-  },
- 
-  {
-    address: "2822 S KEELEY",
-    numTrees: 1,
-    description: "In front of sideyard"
-  },
- 
-  {
-    address: "2826 S KEELEY",
-    numTrees: 1,
-  },
- 
-  {
-    address: "2830 S KEELEY",
-    numTrees: 1,
-  },
- 
-  {
-    address: "2832 S KEELEY",
-    numTrees: 1,
-  },
- 
-  {
-    address: "2834 S KEELEY",
-    numTrees: 1,
-  },
- 
-  {
-    address: "2836 S KEELEY",
-    numTrees: 1,
-  },
- 
-  {
-    address: "2838 S KEELEY",
-    numTrees: 1,
-  },
-  {
-    address: "2840 S KEELEY",
-    numTrees: 1,
-  },
-  {
-    address: "2842 S KEELEY",
-    numTrees: 1,
-  },
- 
-  {
-    address: "2844 S KEELEY",
-    numTrees: 1,
-  },
- 
-  {
-    address: "2846 S KEELEY",
-    numTrees: 1,
-  },
- 
- 
-  {
-    address: "2850 S KEELEY",
-    numTrees: 1,
-  },
- 
- 
-  {
-    address: "2852 S KEELEY",
-    numTrees: 1,
-  },
- 
-  {
-    address: "2856 S KEELEY",
-    numTrees: 1,
-  },
-  {
-    address: "2860 S KEELEY",
-    numTrees: 1,
-  },
-  {
-    address: "2862 S KEELEY",
-    numTrees: 1,
-  },
-  {
-    address: "2866 S KEELEY",
-    numTrees: 1,
-  },
-  {
-    address: "2868 S KEELEY",
-    numTrees: 1,
-  },
-  {
-    address: "2942 S LYMAN",
-    numTrees: 4,
-  },
- 
-  
-];
 
 test("test", async ({ page }) => {
-  for (const { address, numTrees, description } of requests) {
+  for (const { address, numTrees = 1, description } of requests) {
     // Make sure tsv file doens't contain address
+    console.log(`Planting ${numTrees} ${numTrees > 1 ? "trees" : "tree"} at ${address}`);
     if (fs.readFileSync(filename, "utf8").includes(address)) {
       console.log(`Skipping ${address}`)
       continue;
