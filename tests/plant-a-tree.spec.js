@@ -1,6 +1,8 @@
 // @ts-check
 import { test } from "@playwright/test";
 import fs from "fs";
+import { request } from "http";
+import { beforeEach } from "node:test";
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -11,29 +13,42 @@ const randomDelay = Math.floor(Math.random() * (maxDelay - 500 + 1) + minDelay);
 const filename = "./srNumbers.csv";
 
 // parse csv file 'trees-to-plant.csv' into array
-const requests = fs
-  .readFileSync("./trees-to-plant.csv", "utf8")
-  .split("\n")
-  .map((line) => {
+const trees = fs.readFileSync("./trees-to-plant.csv", "utf8").split("\n");
+
+trees.shift(); // Remove header row
+
+function getTrees() {
+  const requests = trees.map((line) => {
     const [houseNumber, street, numTrees, description] = line.split(",");
-    const address = `${houseNumber.trim()} ${street ? street.trim() : ""}`.trim();
+    const address = `${houseNumber.trim()} ${
+      street ? street.trim() : ""
+    }`.trim();
     return {
       address,
       numTrees: numTrees ? parseInt(numTrees) : undefined,
       description,
     };
   });
-
+  console.log("Trees to plant: ", trees.length);
+  return requests
+}
 
 test("test", async ({ page }) => {
+
+  const requests = getTrees();
+
   let i = 0;
   for (const { address, numTrees = 1, description } of requests) {
     i++;
     if (!address.trim()) break;
     // Make sure tsv file doens't contain address
-    console.log(`Planting ${numTrees} ${numTrees > 1 ? "trees" : "tree"} at ${address}. ${description ? `Description: ${description}` : ""}`); 
+    console.log(
+      `Planting ${numTrees} ${numTrees > 1 ? "trees" : "tree"} at ${address}. ${
+        description ? `Description: ${description}` : ""
+      }`
+    );
     if (fs.readFileSync(filename, "utf8").includes(address)) {
-      console.log(`Skipping ${address}`)
+      console.log(`Skipping ${address}`);
       continue;
     }
 
@@ -74,14 +89,22 @@ test("test", async ({ page }) => {
     if (innerText) {
       // @ts-ignore
       const srNumber = innerText.split(" ").pop().replace(".", "");
-      console.log('Planted! SR# Number: ', srNumber);
+      console.log("Planted! SR# Number: ", srNumber);
       try {
         fs.readFileSync(filename, "utf8").startsWith("SR Number");
       } catch (e) {
-        fs.writeFileSync(filename, "SR Number,Address,Requested Date,Requested Time,Number Of Trees\n");
+        fs.writeFileSync(
+          filename,
+          "SR Number,Address,Requested Date,Requested Time,Number Of Trees,Description\n"
+        );
       }
       const date = new Date().toLocaleString();
-      fs.appendFileSync(filename, `${srNumber},${address},${date},${numTrees}\n`);
+      fs.appendFileSync(
+        filename,
+        `${srNumber},${address},${date},${numTrees},${
+          description ? description : whereText
+        }\n`
+      );
     }
     console.log(requests.length - i, "requests left");
     await delay(randomDelay); // <-- here we wait 3s
