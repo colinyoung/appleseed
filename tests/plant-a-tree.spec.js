@@ -1,28 +1,67 @@
 // @ts-check
+import os from "os";
 import { test } from "@playwright/test";
 import fs from "fs";
-import { request } from "http";
-import { beforeEach } from "node:test";
+import { parse } from "csv-parse";
+import { finished } from "stream/promises";
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const maxDelay = 3000;
+const maxDelay = 1000;
 const minDelay = 500;
 const randomDelay = Math.floor(Math.random() * (maxDelay - 500 + 1) + minDelay);
 
 const filename = "./srNumbers.csv";
 
 // parse csv file 'trees-to-plant.csv' into array
-const trees = fs.readFileSync("./trees-to-plant.csv", "utf8").split("\n");
+const file = fs.readFileSync("./trees-to-plant.csv", "utf8");
 
-trees.shift(); // Remove header row
+const records = parse(file, {
+  columns: true,
+  skip_empty_lines: true,
+  ltrim: true,
+  relax_column_count: true,
+});
 
-function getTrees() {
+// interface Tree {
+//   houseNumber: String;
+//   street: String;
+//   numTrees?: Number;
+//   description?: String;
+// }
+
+async function getRecords() {
+  return new Promise((resolve, reject) => {
+    parse(
+      file,
+      {
+        columns: true,
+        skip_empty_lines: true,
+        ltrim: true,
+        relax_column_count: true,
+      },
+      (err, data) => {
+        if (err) {
+          console.error(err);
+          reject(err);
+          return;
+        }
+        resolve(data);
+      }
+    );
+  });
+}
+
+async function getTrees() {
+  const trees = await getRecords();
+
   const requests = trees.map((line) => {
-    const [houseNumber, street, numTrees, description] = line.split(",");
-    const address = `${houseNumber.trim()} ${
-      street ? street.trim() : ""
-    }`.trim();
+    const address = [line.houseNumber, line.street].join(" ");
+    const numTrees = line.numTrees;
+    const description = line.description;
+
+    // parse csv accounting for double quotes to escape
+
     return {
       address,
       numTrees: numTrees ? parseInt(numTrees) : undefined,
@@ -30,12 +69,11 @@ function getTrees() {
     };
   });
   console.log("Trees to plant: ", trees.length);
-  return requests
+  return requests;
 }
 
 test("test", async ({ page }) => {
-
-  const requests = getTrees();
+  const requests = await getTrees();
 
   let i = 0;
   for (const { address, numTrees = 1, description } of requests) {
@@ -59,10 +97,15 @@ test("test", async ({ page }) => {
     await page.getByPlaceholder("Please enter an address").fill(address);
     await delay(randomDelay); // <-- here we wait 3s
 
-    await page
-      .locator("div[role=listbox]")
-      .getByText(new RegExp(`^${address}`))
-      .click();
+    try {
+      await page
+        .locator("div[role=listbox]")
+        .getByText(new RegExp(`^${address}`, "i"))
+        .click();
+    } catch (e) {
+      console.log("Address had an issue!!!!! ", address, e);
+      continue;
+    }
 
     await page.getByRole("button", { name: "Confirm Address" }).click();
     await delay(randomDelay); // <-- here we wait 3s
