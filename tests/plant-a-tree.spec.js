@@ -16,13 +16,6 @@ const filename = "./srNumbers.csv";
 // parse csv file 'trees-to-plant.csv' into array
 const file = fs.readFileSync("./trees-to-plant.csv", "utf8");
 
-const records = parse(file, {
-  columns: true,
-  skip_empty_lines: true,
-  ltrim: true,
-  relax_column_count: true,
-});
-
 // interface Tree {
 //   houseNumber: String;
 //   street: String;
