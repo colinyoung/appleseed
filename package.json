@@ -4,7 +4,7 @@
   "description": "",
   "main": "example.spec.js",
   "scripts": {
-    "start": "playwright test --workers 1 --project chromium"
+    "start": "playwright test --workers 1 --project chromium --headed"
   },
   "keywords": [],
   "author": "",

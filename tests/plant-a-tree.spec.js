@@ -116,7 +116,7 @@ test("test", async ({ page }) => {
     await page.getByRole("button", { name: "next" }).click();
     await page.getByRole("button", { name: "next" }).click();
     await delay(randomDelay); // <-- here we wait 3s
-    // await page.getByRole("button", { name: "Finish" }).click();
+    await page.getByRole("button", { name: "Finish" }).click();
     const text = await page.getByText(
       "Your service request has been submitted, and your number is"
     );
