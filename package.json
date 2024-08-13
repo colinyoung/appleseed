@@ -4,7 +4,7 @@
   "description": "",
   "main": "example.spec.js",
   "scripts": {
-    "start": "playwright test --headed --workers 1 --project chromium"
+    "start": "playwright test --workers 1 --project chromium"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +14,8 @@
     "@types/node": "^20.10.3"
   },
   "dependencies": {
-    "csv-parse": "^5.5.5"
+    "csv-parse": "^5.5.5",
+    "jsdom": "^24.1.0",
+    "playwright": "^1.44.1"
   }
 }
