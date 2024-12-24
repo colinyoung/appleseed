@@ -9,4 +9,12 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+# Create a startup script
+RUN echo '#!/bin/sh\n\
+echo "Running database migrations..."\n\
+node migrate.js\n\
+echo "Starting server..."\n\
+node server.js' > /app/start.sh && \
+    chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]

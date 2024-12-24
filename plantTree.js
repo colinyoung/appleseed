@@ -1,10 +1,9 @@
 import { chromium } from 'playwright';
-import fs from 'fs';
+import { query } from './db.js';
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const maxDelay = 1000;
 const minDelay = 500;
-const filename = "./srNumbers.csv";
 
 export async function plantTree(address, numTrees = 1, description = 'Parkway') {
     const browser = await chromium.launch();
@@ -12,20 +11,19 @@ export async function plantTree(address, numTrees = 1, description = 'Parkway') 
     const page = await context.newPage();
     
     try {
-        if (fs.readFileSync(filename, "utf8").includes(address)) {
+        // Check if address exists in database
+        const existingRequest = await query(
+            'SELECT id FROM tree_requests WHERE street_address = $1',
+            [address]
+        );
+        
+        if (existingRequest.rows.length > 0) {
             await browser.close();
             return { 
                 success: false, 
                 message: `Address ${address} already exists in records` 
             };
         }
-    } catch (e) {
-        // File doesn't exist, create it
-        fs.writeFileSync(
-            filename,
-            "SR Number,Address,Requested Date,Requested Time,Number Of Trees,Description\n"
-        );
-    }
 
     try {
         await page.goto(
@@ -75,10 +73,13 @@ export async function plantTree(address, numTrees = 1, description = 'Parkway') 
         
         if (innerText) {
             const srNumber = innerText.split(" ").pop().replace(".", "");
-            const date = new Date().toLocaleString();
-            fs.appendFileSync(
-                filename,
-                `${srNumber},${address},${date},${numTrees},${whereText}\n`
+            
+            // Store in database
+            await query(
+                `INSERT INTO tree_requests 
+                 (sr_number, street_address, num_trees, location)
+                 VALUES ($1, $2, $3, $4)`,
+                [srNumber, address, numTrees, whereText]
             );
             
             await browser.close();
