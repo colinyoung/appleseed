@@ -1,0 +1,109 @@
+name: Provision RDS Serverless
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'create'
+        type: choice
+        options:
+          - create
+          - update
+          - delete
+
+env:
+  AWS_REGION: us-east-1
+  STACK_NAME: tree-planting-db
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Deploy RDS
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy CloudFormation stack
+        if: github.event.inputs.action != 'delete'
+        run: |
+          aws cloudformation ${{ github.event.inputs.action == 'create' && 'create-stack' || 'update-stack' }} \
+            --stack-name ${{ env.STACK_NAME }}-${{ github.event.inputs.environment }} \
+            --template-body file://.aws/rds-serverless.yml \
+            --capabilities CAPABILITY_IAM \
+            --parameters \
+              ParameterKey=DatabaseName,ParameterValue=treeplanting_${{ github.event.inputs.environment }}
+
+      - name: Delete CloudFormation stack
+        if: github.event.inputs.action == 'delete'
+        run: |
+          aws cloudformation delete-stack \
+            --stack-name ${{ env.STACK_NAME }}-${{ github.event.inputs.environment }}
+
+      - name: Wait for stack completion
+        if: github.event.inputs.action != 'delete'
+        run: |
+          aws cloudformation wait stack-${{ github.event.inputs.action == 'create' && 'create-complete' || 'update-complete' }} \
+            --stack-name ${{ env.STACK_NAME }}-${{ github.event.inputs.environment }}
+
+      - name: Store database URL in Parameter Store
+        if: github.event.inputs.action != 'delete'
+        run: |
+          # Get stack outputs
+          ENDPOINT=$(aws cloudformation describe-stacks \
+            --stack-name ${{ env.STACK_NAME }}-${{ github.event.inputs.environment }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`DBEndpoint`].OutputValue' \
+            --output text)
+          
+          PORT=$(aws cloudformation describe-stacks \
+            --stack-name ${{ env.STACK_NAME }}-${{ github.event.inputs.environment }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`DBPort`].OutputValue' \
+            --output text)
+          
+          SECRET_ARN=$(aws cloudformation describe-stacks \
+            --stack-name ${{ env.STACK_NAME }}-${{ github.event.inputs.environment }} \
+            --query 'Stacks[0].Outputs[?OutputKey==`DBSecretARN`].OutputValue' \
+            --output text)
+          
+          # Get database credentials from Secrets Manager
+          DB_CREDS=$(aws secretsmanager get-secret-value --secret-id $SECRET_ARN --query 'SecretString' --output text)
+          USERNAME=$(echo $DB_CREDS | jq -r '.username')
+          PASSWORD=$(echo $DB_CREDS | jq -r '.password')
+          
+          # Construct database URL
+          DB_URL="postgres://$USERNAME:$PASSWORD@$ENDPOINT:$PORT/treeplanting_${{ github.event.inputs.environment }}"
+          
+          # Store in Parameter Store
+          aws ssm put-parameter \
+            --name "/tree-planting/${{ github.event.inputs.environment }}/database-url" \
+            --value "$DB_URL" \
+            --type "SecureString" \
+            --overwrite
+
+      - name: Output connection information
+        if: github.event.inputs.action != 'delete'
+        run: |
+          echo "Database has been provisioned successfully!"
+          echo "Connection information has been stored in Parameter Store at:"
+          echo "/tree-planting/${{ github.event.inputs.environment }}/database-url"

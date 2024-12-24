@@ -1,5 +1,30 @@
 # AWS Setup for Tree Planting API
 
+## Database Setup
+
+### RDS Serverless v2 Provisioning
+
+1. Navigate to GitHub Actions in your repository
+2. Select the "Provision RDS Serverless" workflow
+3. Click "Run workflow" and select:
+   - Environment (production/staging)
+   - Action (create/update/delete)
+
+The workflow will:
+1. Create a new VPC with private subnets
+2. Deploy an Aurora PostgreSQL Serverless v2 cluster
+3. Configure security groups and subnet groups
+4. Store credentials securely in AWS Secrets Manager
+5. Save the database URL in AWS Systems Manager Parameter Store
+
+### Database Features
+- Serverless v2 with auto-scaling (0.5-1 ACU)
+- Automatic storage scaling
+- Encrypted storage
+- Private VPC access only
+- Automated backups
+- High availability with multi-AZ
+
 ## Prerequisites
 
 1. AWS Account with appropriate permissions
