@@ -3,14 +3,6 @@ name: Provision RDS Serverless
 on:
   workflow_dispatch:
     inputs:
-      environment:
-        description: 'Environment to deploy to'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-          - production
-          - staging
       action:
         description: 'Action to perform'
         required: true
@@ -33,7 +25,7 @@ jobs:
   deploy:
     name: Deploy RDS
     runs-on: ubuntu-latest
-    environment: ${{ github.event.inputs.environment }}
+    environment: production
 
     steps:
       - name: Checkout
