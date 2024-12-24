@@ -1,21 +1,18 @@
 {
-  "name": "tests",
+  "name": "tree-planting-api",
   "version": "1.0.0",
-  "description": "",
-  "main": "example.spec.js",
+  "description": "API for planting trees in Chicago",
+  "type": "module",
+  "main": "server.js",
   "scripts": {
-    "start": "playwright test --workers 1 --project chromium --headed"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@playwright/test": "^1.40.1",
-    "@types/node": "^20.10.3"
-  },
   "dependencies": {
     "csv-parse": "^5.5.5",
-    "jsdom": "^24.1.0",
+    "express": "^4.18.2",
     "playwright": "^1.44.1"
   }
 }
