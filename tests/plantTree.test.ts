@@ -10,29 +10,37 @@ jest.mock('playwright', () => ({
           goto: jest.fn(),
           getByPlaceholder: jest.fn().mockReturnValue({
             click: jest.fn(),
-            fill: jest.fn()
+            fill: jest.fn(),
           }),
           locator: jest.fn().mockReturnValue({
             getByText: jest.fn().mockReturnValue({
-              click: jest.fn()
-            })
+              click: jest.fn(),
+            }),
           }),
           getByRole: jest.fn().mockReturnValue({
-            click: jest.fn()
+            click: jest.fn(),
           }),
           getByLabel: jest.fn().mockReturnValue({
             click: jest.fn(),
             fill: jest.fn(),
-            innerText: jest.fn().mockResolvedValue('Your service request has been submitted, and your number is 12345.')
+            innerText: jest
+              .fn()
+              .mockResolvedValue(
+                'Your service request has been submitted, and your number is 12345.',
+              ),
           }),
           getByText: jest.fn().mockReturnValue({
-            innerText: jest.fn().mockResolvedValue('Your service request has been submitted, and your number is 12345.')
-          })
-        })
+            innerText: jest
+              .fn()
+              .mockResolvedValue(
+                'Your service request has been submitted, and your number is 12345.',
+              ),
+          }),
+        }),
       }),
-      close: jest.fn()
-    })
-  }
+      close: jest.fn(),
+    }),
+  },
 }));
 
 describe('Plant Tree Function', () => {
@@ -50,7 +58,7 @@ describe('Plant Tree Function', () => {
     expect(result.message).toContain('already exists');
     expect(mockQuery).toHaveBeenCalledWith(
       expect.stringContaining('SELECT id FROM tree_requests'),
-      ['123 Main St']
+      ['123 Main St'],
     );
   });
 
@@ -63,10 +71,12 @@ describe('Plant Tree Function', () => {
 
     expect(result.success).toBe(true);
     expect(result.srNumber).toBe('12345');
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO tree_requests'),
-      ['12345', '123 Main St', 2, 'Side of building']
-    );
+    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO tree_requests'), [
+      '12345',
+      '123 Main St',
+      2,
+      'Side of building',
+    ]);
   });
 
   it('should handle invalid addresses', async () => {
@@ -82,19 +92,19 @@ describe('Plant Tree Function', () => {
               goto: jest.fn(),
               getByPlaceholder: jest.fn().mockReturnValue({
                 click: jest.fn(),
-                fill: jest.fn()
+                fill: jest.fn(),
               }),
               locator: jest.fn().mockReturnValue({
                 getByText: jest.fn().mockReturnValue({
-                  click: mockClick
-                })
+                  click: mockClick,
+                }),
               }),
-              close: jest.fn()
-            })
+              close: jest.fn(),
+            }),
           }),
-          close: jest.fn()
-        })
-      }
+          close: jest.fn(),
+        }),
+      },
     }));
 
     const { plantTree } = await import('../plantTree.js');

@@ -67,25 +67,25 @@ jobs:
             --stack-name ${{ env.STACK_NAME }}-${{ github.event.inputs.environment }} \
             --query 'Stacks[0].Outputs[?OutputKey==`DBEndpoint`].OutputValue' \
             --output text)
-          
+
           PORT=$(aws cloudformation describe-stacks \
             --stack-name ${{ env.STACK_NAME }}-${{ github.event.inputs.environment }} \
             --query 'Stacks[0].Outputs[?OutputKey==`DBPort`].OutputValue' \
             --output text)
-          
+
           SECRET_ARN=$(aws cloudformation describe-stacks \
             --stack-name ${{ env.STACK_NAME }}-${{ github.event.inputs.environment }} \
             --query 'Stacks[0].Outputs[?OutputKey==`DBSecretARN`].OutputValue' \
             --output text)
-          
+
           # Get database credentials from Secrets Manager
           DB_CREDS=$(aws secretsmanager get-secret-value --secret-id $SECRET_ARN --query 'SecretString' --output text)
           USERNAME=$(echo $DB_CREDS | jq -r '.username')
           PASSWORD=$(echo $DB_CREDS | jq -r '.password')
-          
+
           # Construct database URL
           DB_URL="postgres://$USERNAME:$PASSWORD@$ENDPOINT:$PORT/treeplanting_${{ github.event.inputs.environment }}"
-          
+
           # Store in Parameter Store
           aws ssm put-parameter \
             --name "/tree-planting/${{ github.event.inputs.environment }}/database-url" \

@@ -1,16 +1,10 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
     <title>Guides</title>
-    <meta
-      name="viewport"
-      content="initial-scale=1,maximum-scale=1,user-scalable=no"
-    />
-    <link
-      href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css"
-      rel="stylesheet"
-    />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.css" rel="stylesheet" />
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.2.0/mapbox-gl.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="
@@ -33,10 +27,10 @@ https://cdn.jsdelivr.net/npm/csv-parse@5.5.5/dist/umd/sync.min.js
     <div id="map"></div>
     <script>
       mapboxgl.accessToken =
-        "pk.eyJ1IjoiY29saW55b3VuZyIsImEiOiJjbHVuZmhxZHowbzd6MmxvMm5nbm9nbHA4In0.txHuyikzlxyzSK6AVMdpNw";
+        'pk.eyJ1IjoiY29saW55b3VuZyIsImEiOiJjbHVuZmhxZHowbzd6MmxvMm5nbm9nbHA4In0.txHuyikzlxyzSK6AVMdpNw';
       const map = new mapboxgl.Map({
-        container: "map",
-        style: "mapbox://styles/mapbox/streets-v9",
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v9',
         // projection: 'globe', // Display the map as a globe, since satellite-v9 defaults to Mercator
         zoom: 1,
         center: [30, 15],
@@ -44,43 +38,49 @@ https://cdn.jsdelivr.net/npm/csv-parse@5.5.5/dist/umd/sync.min.js
 
       // fetch file srNumbers.csv from same directory
       (async function main() {
-        const file = await axios.get("/geocoded.csv");
+        const file = await axios.get('/geocoded.csv');
         const records = await getRecords(file);
         const features = records.map((row) => {
           const feature = {
-            type: "Feature",
+            type: 'Feature',
             geometry: {
-              type: "Point",
+              type: 'Point',
               coordinates: [row.lon, row.lat],
             },
             properties: {
-              text: row["original_SR Number"],
+              text: row['original_SR Number'],
             },
             zoom: 9,
           };
           return feature;
         });
-        map.on("load", () => {
+        map.on('load', () => {
           map.addLayer({
-            id: "trees",
-            type: "circle",
+            id: 'trees',
+            type: 'circle',
             source: {
-              type: "geojson",
+              type: 'geojson',
               data: {
-                type: "FeatureCollection",
+                type: 'FeatureCollection',
                 features: features,
               },
             },
             paint: {
-              "circle-radius": 5,
-              "circle-color": "green",
+              'circle-radius': 5,
+              'circle-color': 'green',
             },
           });
         });
         // Zoom to wrap points
-        const bounds = features.reduce((bounds, feature) => {
-          return bounds.extend(feature.geometry.coordinates);
-        }, new mapboxgl.LngLatBounds(features[0].geometry.coordinates, features[0].geometry.coordinates));
+        const bounds = features.reduce(
+          (bounds, feature) => {
+            return bounds.extend(feature.geometry.coordinates);
+          },
+          new mapboxgl.LngLatBounds(
+            features[0].geometry.coordinates,
+            features[0].geometry.coordinates,
+          ),
+        );
         map.fitBounds(bounds, {
           padding: 0,
           animate: false,

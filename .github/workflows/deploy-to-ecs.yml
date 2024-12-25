@@ -3,11 +3,11 @@ name: Deploy to Amazon ECS
 on:
   push:
     branches:
-      - main  # or your production branch
-  workflow_dispatch:  # allows manual trigger
+      - main # or your production branch
+  workflow_dispatch: # allows manual trigger
 
 env:
-  AWS_REGION: us-east-1  # Change to your AWS region
+  AWS_REGION: us-east-1 # Change to your AWS region
   ECR_REPOSITORY: tree-planting-api
   ECS_SERVICE: tree-planting-service
   ECS_CLUSTER: tree-planting-cluster

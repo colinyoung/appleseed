@@ -8,7 +8,7 @@ describe('Database Migrations', () => {
     mockFs({
       'srNumbers.csv': `SR Number,Address,Requested Date,Number Of Trees,Description
 123,456 Main St,2024-01-01,2,Parkway
-456,789 Oak St,2024-01-02,1,Side of building`
+456,789 Oak St,2024-01-02,1,Side of building`,
     });
   });
 
@@ -29,11 +29,11 @@ describe('Database Migrations', () => {
 
     expect(mockQuery).toHaveBeenCalledWith(
       expect.stringContaining('CREATE TABLE IF NOT EXISTS migrations'),
-      []
+      [],
     );
     expect(mockQuery).toHaveBeenCalledWith(
       expect.stringContaining('CREATE TABLE IF NOT EXISTS tree_requests'),
-      []
+      [],
     );
   });
 
@@ -44,14 +44,20 @@ describe('Database Migrations', () => {
     const { migrate } = await import('../migrate.js');
     await migrate();
 
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO tree_requests'),
-      ['123', '456 Main St', 2, 'Parkway', expect.any(Date)]
-    );
-    expect(mockQuery).toHaveBeenCalledWith(
-      expect.stringContaining('INSERT INTO tree_requests'),
-      ['456', '789 Oak St', 1, 'Side of building', expect.any(Date)]
-    );
+    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO tree_requests'), [
+      '123',
+      '456 Main St',
+      2,
+      'Parkway',
+      expect.any(Date),
+    ]);
+    expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO tree_requests'), [
+      '456',
+      '789 Oak St',
+      1,
+      'Side of building',
+      expect.any(Date),
+    ]);
   });
 
   it('should skip already executed migrations', async () => {
@@ -60,9 +66,6 @@ describe('Database Migrations', () => {
     const { migrate } = await import('../migrate.js');
     await migrate();
 
-    expect(mockQuery).not.toHaveBeenCalledWith(
-      expect.stringContaining('CREATE TABLE'),
-      []
-    );
+    expect(mockQuery).not.toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE'), []);
   });
 });

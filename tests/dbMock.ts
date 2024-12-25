@@ -3,5 +3,5 @@ export const mockGetClient = jest.fn();
 
 jest.mock('../db.js', () => ({
   query: (...args) => mockQuery(...args),
-  getClient: (...args) => mockGetClient(...args)
+  getClient: (...args) => mockGetClient(...args),
 }));

@@ -11,6 +11,7 @@
    - Action (create/update/delete)
 
 The workflow will:
+
 1. Create a new VPC with private subnets
 2. Deploy an Aurora PostgreSQL Serverless v2 cluster
 3. Configure security groups and subnet groups
@@ -18,6 +19,7 @@ The workflow will:
 5. Save the database URL in AWS Systems Manager Parameter Store
 
 ### Database Features
+
 - Serverless v2 with auto-scaling (0.5-1 ACU)
 - Automatic storage scaling
 - Encrypted storage
@@ -36,11 +38,13 @@ The workflow will:
 ## Required AWS Resources
 
 ### 1. ECR Repository
+
 ```bash
 aws ecr create-repository --repository-name tree-planting-api
 ```
 
 ### 2. ECS Cluster
+
 ```bash
 aws ecs create-cluster --cluster-name tree-planting-cluster
 ```
@@ -48,15 +52,20 @@ aws ecs create-cluster --cluster-name tree-planting-cluster
 ### 3. IAM Roles
 
 #### Task Execution Role
+
 Create an IAM role named `ecsTaskExecutionRole` with the following policies:
+
 - AmazonECSTaskExecutionRolePolicy
 - Permission to read from AWS Systems Manager Parameter Store
 
 #### Task Role
+
 Create an IAM role named `ecsTaskRole` with necessary permissions for your application.
 
 ### 4. GitHub Actions Role
+
 Create an IAM role for GitHub Actions with the following trust relationship:
+
 ```json
 {
   "Version": "2012-10-17",
@@ -81,7 +90,9 @@ Create an IAM role for GitHub Actions with the following trust relationship:
 ```
 
 ### 5. Systems Manager Parameter Store
+
 Store the database URL securely:
+
 ```bash
 aws ssm put-parameter \
     --name "/tree-planting/database-url" \
@@ -92,11 +103,13 @@ aws ssm put-parameter \
 ## GitHub Secrets Required
 
 Add the following secrets to your GitHub repository:
+
 - `AWS_ROLE_ARN`: The ARN of the GitHub Actions role created above
 
 ## Task Definition
 
 The task definition in `.aws/task-definition.json` needs to be updated with your:
+
 - AWS Account ID
 - Region
 - Task execution role ARN
@@ -105,6 +118,7 @@ The task definition in `.aws/task-definition.json` needs to be updated with your
 ## Network Configuration
 
 Ensure your ECS service is configured with:
+
 - VPC with public and private subnets
 - Security groups allowing inbound traffic on port 3000
 - Application Load Balancer (if needed)
@@ -112,11 +126,13 @@ Ensure your ECS service is configured with:
 ## Deployment
 
 The GitHub Actions workflow will:
+
 1. Build the Docker image
 2. Push it to ECR
 3. Update the ECS task definition
 4. Deploy to ECS
 
 You can trigger deployments by:
+
 - Pushing to the main branch
 - Manually triggering the workflow in GitHub Actions
