@@ -29,7 +29,7 @@ const migrations = [
   `CREATE INDEX IF NOT EXISTS idx_tree_requests_street_address ON tree_requests(street_address)`,
 ];
 
-async function runMigration(migration, index) {
+export async function runMigration(migration, index) {
   try {
     // Check if migration was already executed
     const migrationCheck = await query('SELECT id FROM migrations WHERE name = $1', [
@@ -53,7 +53,7 @@ async function runMigration(migration, index) {
   }
 }
 
-async function importExistingData() {
+export async function importExistingData() {
   const filename = './srNumbers.csv';
 
   try {
@@ -108,7 +108,7 @@ async function importExistingData() {
   }
 }
 
-async function migrate() {
+export async function migrate() {
   console.log('Starting database migrations...');
 
   for (let i = 0; i < migrations.length; i++) {
