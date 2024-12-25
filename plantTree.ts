@@ -1,6 +1,13 @@
 import { chromium } from 'playwright';
 import { query } from './db';
 
+export type PlantTreeResult = {
+  success: boolean;
+  message: string;
+  error?: string;
+  srNumber?: string;
+};
+
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const maxDelay = 1000;
 const minDelay = 500;

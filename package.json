@@ -34,22 +34,5 @@
     "supertest": "^6.3.3",
     "ts-jest": "^29.2.5",
     "typescript": "^5.7.2"
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.tsx?$": [
-        "ts-jest",
-        {
-          "useESM": true
-        }
-      ]
-    },
-    "extensionsToTreatAsEsm": [
-      ".ts"
-    ],
-    "testEnvironment": "node",
-    "moduleNameMapper": {
-      "#(.*)": "<rootDir>/node_modules/$1"
-    }
   }
 }

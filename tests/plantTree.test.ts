@@ -1,45 +1,39 @@
 import { jest } from '@jest/globals';
-import { mockQuery } from './dbMock.js';
+import { mockQuery } from './dbMock';
+import type { Browser, BrowserContext, Page, Locator } from 'playwright';
 
 // Mock Playwright
+const mockLocator = {
+  click: jest.fn(),
+  fill: jest.fn(),
+  innerText: jest.fn().mockResolvedValue(
+    'Your service request has been submitted, and your number is 12345.',
+  ),
+} as jest.Mocked<Locator>;
+
+const mockPage = {
+  goto: jest.fn(),
+  getByPlaceholder: jest.fn().mockReturnValue(mockLocator),
+  locator: jest.fn().mockReturnValue({
+    getByText: jest.fn().mockReturnValue(mockLocator),
+  }),
+  getByRole: jest.fn().mockReturnValue(mockLocator),
+  getByLabel: jest.fn().mockReturnValue(mockLocator),
+  getByText: jest.fn().mockReturnValue(mockLocator),
+} as jest.Mocked<Page>;
+
+const mockContext = {
+  newPage: jest.fn().mockResolvedValue(mockPage),
+} as jest.Mocked<BrowserContext>;
+
+const mockBrowser = {
+  newContext: jest.fn().mockResolvedValue(mockContext),
+  close: jest.fn(),
+} as jest.Mocked<Browser>;
+
 jest.mock('playwright', () => ({
   chromium: {
-    launch: jest.fn().mockResolvedValue({
-      newContext: jest.fn().mockResolvedValue({
-        newPage: jest.fn().mockResolvedValue({
-          goto: jest.fn(),
-          getByPlaceholder: jest.fn().mockReturnValue({
-            click: jest.fn(),
-            fill: jest.fn(),
-          }),
-          locator: jest.fn().mockReturnValue({
-            getByText: jest.fn().mockReturnValue({
-              click: jest.fn(),
-            }),
-          }),
-          getByRole: jest.fn().mockReturnValue({
-            click: jest.fn(),
-          }),
-          getByLabel: jest.fn().mockReturnValue({
-            click: jest.fn(),
-            fill: jest.fn(),
-            innerText: jest
-              .fn()
-              .mockResolvedValue(
-                'Your service request has been submitted, and your number is 12345.',
-              ),
-          }),
-          getByText: jest.fn().mockReturnValue({
-            innerText: jest
-              .fn()
-              .mockResolvedValue(
-                'Your service request has been submitted, and your number is 12345.',
-              ),
-          }),
-        }),
-      }),
-      close: jest.fn(),
-    }),
+    launch: jest.fn().mockResolvedValue(mockBrowser),
   },
 }));
 
@@ -84,28 +78,11 @@ describe('Plant Tree Function', () => {
 
     // Mock Playwright to simulate address not found
     const mockClick = jest.fn().mockRejectedValue(new Error('Address not found'));
-    jest.mock('playwright', () => ({
-      chromium: {
-        launch: jest.fn().mockResolvedValue({
-          newContext: jest.fn().mockResolvedValue({
-            newPage: jest.fn().mockResolvedValue({
-              goto: jest.fn(),
-              getByPlaceholder: jest.fn().mockReturnValue({
-                click: jest.fn(),
-                fill: jest.fn(),
-              }),
-              locator: jest.fn().mockReturnValue({
-                getByText: jest.fn().mockReturnValue({
-                  click: mockClick,
-                }),
-              }),
-              close: jest.fn(),
-            }),
-          }),
-          close: jest.fn(),
-        }),
-      },
-    }));
+    mockPage.locator = jest.fn().mockReturnValue({
+      getByText: jest.fn().mockReturnValue({
+        click: mockClick,
+      }),
+    });
 
     const { plantTree } = await import('../plantTree.js');
     const result = await plantTree('Invalid Address');

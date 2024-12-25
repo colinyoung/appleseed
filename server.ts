@@ -1,7 +1,7 @@
 import express from 'express';
 import { plantTree } from './plantTree.js';
 
-const app = express();
+export const app = express();
 app.use(express.json());
 
 app.post('/plant-tree', async (req, res) => {

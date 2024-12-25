@@ -1,33 +1,16 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
-import express from 'express';
+import type { PlantTreeResult } from '../plantTree';
 
 // Mock the plantTree function
-jest.mock('../plantTree.js', () => ({
-  plantTree: jest.fn(),
-}));
-import { plantTree } from '../plantTree.js';
+jest.mock('../plantTree');
 
 // Import the server code
-const app = express();
-app.use(express.json());
-app.post('/plant-tree', async (req, res) => {
-  const { streetAddress, numTrees, location } = req.body;
+import { app } from '../server';
+import { plantTree } from '../plantTree';
 
-  if (!streetAddress) {
-    return res.status(400).json({ error: 'streetAddress is required' });
-  }
-
-  try {
-    const result = await plantTree(streetAddress, numTrees || 1, location || 'Parkway');
-    res.json(result);
-  } catch (error) {
-    res.status(500).json({
-      error: error.message,
-      success: false,
-    });
-  }
-});
+// Cast the mock
+const mockPlantTree = plantTree as jest.MockedFunction<typeof plantTree>;
 
 describe('Server API', () => {
   beforeEach(() => {

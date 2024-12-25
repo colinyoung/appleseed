@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals';
 import mockFs from 'mock-fs';
-import { mockQuery } from './dbMock.js';
+import { mockQuery } from './dbMock';
 
 describe('Database Migrations', () => {
   beforeEach(() => {
