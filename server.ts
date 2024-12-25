@@ -1,10 +1,16 @@
-import express from 'express';
+import express, { Request, RequestHandler, Response } from 'express';
 import { plantTree } from './plantTree.js';
+
+interface PlantTreeRequest {
+  streetAddress: string;
+  numTrees?: number;
+  location?: string;
+}
 
 export const app = express();
 app.use(express.json());
 
-app.post('/plant-tree', async (req, res) => {
+const plantTreeHandler = async (req: Request<{}, any, PlantTreeRequest>, res: Response) => {
   const { streetAddress, numTrees, location } = req.body;
 
   if (!streetAddress) {
@@ -16,13 +22,19 @@ app.post('/plant-tree', async (req, res) => {
     res.json(result);
   } catch (error) {
     res.status(500).json({
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       success: false,
     });
   }
-});
+};
+
+app.post('/plant-tree', plantTreeHandler as RequestHandler);
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+
+export default app;

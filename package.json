@@ -5,8 +5,8 @@
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node migrate.js && node server.js",
-    "migrate": "node migrate.js",
+    "start": "tsx migrate.ts && tsx server.ts",
+    "migrate": "tsx migrate.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch"
   },
@@ -33,6 +33,7 @@
     "prettier": "^3.4.2",
     "supertest": "^6.3.3",
     "ts-jest": "^29.2.5",
+    "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
 }

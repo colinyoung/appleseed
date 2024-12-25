@@ -1,6 +1,14 @@
+jest.mock('../db', () => ({
+  query: mockQuery,
+  getClient: jest.fn(),
+}));
+
 import { jest } from '@jest/globals';
 import mockFs from 'mock-fs';
-import { mockQuery } from './dbMock';
+import { mockQuery, fakeQueryResult } from './dbMock';
+
+import { migrate } from '../migrate';
+import { QueryResult } from 'pg';
 
 describe('Database Migrations', () => {
   beforeEach(() => {
@@ -17,14 +25,13 @@ describe('Database Migrations', () => {
   });
 
   it('should create required tables', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] }); // migrations table check
-    mockQuery.mockResolvedValueOnce({}); // create migrations table
-    mockQuery.mockResolvedValueOnce({}); // create tree_requests table
-    mockQuery.mockResolvedValueOnce({}); // create index 1
-    mockQuery.mockResolvedValueOnce({}); // create index 2
-    mockQuery.mockResolvedValueOnce({}); // record migration
+    mockQuery.mockResolvedValueOnce({ ...fakeQueryResult, rows: [] }); // migrations table check
+    mockQuery.mockResolvedValueOnce(fakeQueryResult); // create migrations table
+    mockQuery.mockResolvedValueOnce(fakeQueryResult); // create tree_requests table
+    mockQuery.mockResolvedValueOnce(fakeQueryResult); // create index 1
+    mockQuery.mockResolvedValueOnce(fakeQueryResult); // create index 2
+    mockQuery.mockResolvedValueOnce(fakeQueryResult); // record migration
 
-    const { migrate } = await import('../migrate.js');
     await migrate();
 
     expect(mockQuery).toHaveBeenCalledWith(
@@ -38,10 +45,9 @@ describe('Database Migrations', () => {
   });
 
   it('should import existing data from CSV', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] }); // migrations already done
-    mockQuery.mockResolvedValueOnce({ rows: [] }); // no existing records
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] } as QueryResult); // migrations already done
+    mockQuery.mockResolvedValueOnce({ rows: [] } as unknown as QueryResult); // no existing records
 
-    const { migrate } = await import('../migrate.js');
     await migrate();
 
     expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO tree_requests'), [
@@ -61,9 +67,8 @@ describe('Database Migrations', () => {
   });
 
   it('should skip already executed migrations', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] }); // migration exists
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] } as QueryResult); // migration exists
 
-    const { migrate } = await import('../migrate.js');
     await migrate();
 
     expect(mockQuery).not.toHaveBeenCalledWith(expect.stringContaining('CREATE TABLE'), []);

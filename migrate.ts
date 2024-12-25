@@ -2,13 +2,15 @@ import { query } from './db.js';
 import fs from 'fs';
 import { parse } from 'csv-parse';
 
-const migrations = [
-  // Create migrations table
-  `CREATE TABLE IF NOT EXISTS migrations (
+const CREATE_MIGRATIONS_TABLE = `CREATE TABLE IF NOT EXISTS migrations (
         id SERIAL PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )`,
+    )`;
+
+const migrations = [
+  // Create migrations table
+  CREATE_MIGRATIONS_TABLE,
 
   // Create tree_requests table
   `CREATE TABLE IF NOT EXISTS tree_requests (
@@ -19,6 +21,8 @@ const migrations = [
         location TEXT NOT NULL,
         requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         status VARCHAR(50) DEFAULT 'completed',
+        zipcode VARCHAR(10) DEFAULT '',
+        confirmed_planted BOOLEAN DEFAULT FALSE,
         notes TEXT
     )`,
 
@@ -29,7 +33,7 @@ const migrations = [
   `CREATE INDEX IF NOT EXISTS idx_tree_requests_street_address ON tree_requests(street_address)`,
 ];
 
-export async function runMigration(migration, index) {
+export async function runMigration(migration: string, index: number) {
   try {
     // Check if migration was already executed
     const migrationCheck = await query('SELECT id FROM migrations WHERE name = $1', [
@@ -38,7 +42,7 @@ export async function runMigration(migration, index) {
 
     if (migrationCheck.rows.length === 0) {
       // Run migration
-      await query(migration);
+      await query(migration, []);
 
       // Record migration
       await query('INSERT INTO migrations (name) VALUES ($1)', [`migration_${index + 1}`]);
@@ -48,8 +52,15 @@ export async function runMigration(migration, index) {
       console.log(`Migration ${index + 1} already executed`);
     }
   } catch (error) {
-    console.error(`Error executing migration ${index + 1}:`, error);
-    throw error;
+    if ((error as Error).message.includes('relation "migrations" does not exist')) {
+      console.log('Migrations table does not exist, creating it...');
+      await query(CREATE_MIGRATIONS_TABLE, []);
+      console.log('Migrations table created, now run again');
+      return;
+    } else {
+      console.error(`Error executing migration ${index + 1}:`, error);
+      throw error;
+    }
   }
 }
 
@@ -65,7 +76,7 @@ export async function importExistingData() {
     const fileContent = fs.readFileSync(filename, 'utf8');
 
     // Parse CSV file
-    const records = await new Promise((resolve, reject) => {
+    const records: Record<string, string>[] = await new Promise((resolve, reject) => {
       parse(
         fileContent,
         {
@@ -86,15 +97,19 @@ export async function importExistingData() {
       try {
         await query(
           `INSERT INTO tree_requests 
-                     (sr_number, street_address, num_trees, location, requested_at)
-                     VALUES ($1, $2, $3, $4, $5)
+                     (sr_number, street_address, zipcode, num_trees, location, requested_at, confirmed_planted)
+                     VALUES ($1, $2, $3, $4, $5, $6, $7)
                      ON CONFLICT (sr_number) DO NOTHING`,
           [
             record['SR Number'],
             record['Address'],
+            record['Zipcode'],
             parseInt(record['Number Of Trees'] || '1'),
-            record['Description'] || 'Parkway',
-            new Date(record['Requested Date']),
+            record['Location'] || 'Parkway',
+            record['Request Date']
+              ? new Date(record['Request Date']).toISOString()
+              : new Date().toISOString(),
+            record['Confirmed Planted'] === 'Yes',
           ],
         );
       } catch (error) {

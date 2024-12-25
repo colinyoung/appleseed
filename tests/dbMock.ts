@@ -1,10 +1,13 @@
 import { jest } from '@jest/globals';
 import type { QueryResult } from 'pg';
 
-export const mockQuery = jest.fn();
+export const mockQuery = jest.fn<() => Promise<QueryResult<any>>>();
 export const mockGetClient = jest.fn();
 
-jest.mock('../db.js', () => ({
-  query: mockQuery,
-  getClient: mockGetClient,
-}));
+export const fakeQueryResult: QueryResult = {
+  rows: [],
+  rowCount: 0,
+  command: '',
+  oid: 0,
+  fields: [],
+};

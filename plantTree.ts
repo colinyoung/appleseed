@@ -16,6 +16,8 @@ export async function plantTree(address: string, numTrees = 1, description = 'Pa
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
+  console.log(`Planting ${numTrees} tree(s) at ${address}`);
+  console.log(`Location: ${description}`);
 
   try {
     // Check if address exists in database
@@ -37,46 +39,51 @@ export async function plantTree(address: string, numTrees = 1, description = 'Pa
     await page.getByPlaceholder('Please enter an address').click();
     await page.getByPlaceholder('Please enter an address').fill(address);
     await delay(Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay));
+    console.log('Filled address');
 
     try {
       await page
         .locator('div[role=listbox]')
         .getByText(new RegExp(`^${address}`, 'i'))
         .click();
+      console.log('Clicked address');
     } catch (e) {
       await browser.close();
       return {
         success: false,
         message: `Invalid address: ${address}`,
-        error: e.message,
+        error: e instanceof Error ? e.message : 'Unknown error',
       };
     }
 
     await page.getByRole('button', { name: 'Confirm Address' }).click();
     await delay(Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay));
+    console.log('Clicked confirm address');
 
     const where = await page.getByLabel('*1. Where would you like the');
     await where.click();
+    console.log('Clicked where');
 
     const whereText = numTrees > 2 ? 'Parkway along long side of building' : description;
     await where.fill(whereText);
     await page.getByLabel('2. How many trees are you').click();
     await page.getByLabel('2. How many trees are you').fill(numTrees.toString());
     await delay(Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay));
+    console.log('Filled number of trees');
 
     await page.getByRole('button', { name: 'next' }).click();
     await page.getByRole('button', { name: 'next' }).click();
     await delay(Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay));
-
+    console.log('Clicked next');
     await page.getByRole('button', { name: 'Finish' }).click();
-
+    console.log('Clicked finish');
     const text = await page.getByText(
       'Your service request has been submitted, and your number is',
     );
     const innerText = await text.innerText();
 
     if (innerText) {
-      const srNumber = innerText.split(' ').pop().replace('.', '');
+      const srNumber = innerText.split(' ').pop()?.replace('.', '');
 
       // Store in database
       await query(
@@ -104,7 +111,7 @@ export async function plantTree(address: string, numTrees = 1, description = 'Pa
     return {
       success: false,
       message: 'Error during tree planting process',
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }

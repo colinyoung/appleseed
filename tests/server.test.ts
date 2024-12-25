@@ -1,16 +1,21 @@
 import { jest } from '@jest/globals';
 import request from 'supertest';
-import type { PlantTreeResult } from '../plantTree';
-
-// Mock the plantTree function
-jest.mock('../plantTree');
 
 // Import the server code
 import { app } from '../server';
 import { plantTree } from '../plantTree';
 
-// Cast the mock
-const mockPlantTree = plantTree as jest.MockedFunction<typeof plantTree>;
+jest.mock('../server', () => ({
+  app: {
+    post: jest.fn(),
+    listen: jest.fn(),
+  },
+}));
+
+// Mock the plantTree function
+jest.mock('../plantTree', () => ({
+  plantTree: jest.fn(),
+}));
 
 describe('Server API', () => {
   beforeEach(() => {
@@ -26,7 +31,7 @@ describe('Server API', () => {
 
   it('should plant a tree with default values', async () => {
     const mockResult = { success: true, srNumber: '123', message: 'Tree planted' };
-    plantTree.mockResolvedValue(mockResult);
+    (plantTree as jest.MockedFunction<typeof plantTree>).mockResolvedValue(mockResult);
 
     const response = await request(app).post('/plant-tree').send({ streetAddress: '123 Main St' });
 
@@ -37,7 +42,7 @@ describe('Server API', () => {
 
   it('should plant trees with custom values', async () => {
     const mockResult = { success: true, srNumber: '123', message: 'Trees planted' };
-    plantTree.mockResolvedValue(mockResult);
+    (plantTree as jest.MockedFunction<typeof plantTree>).mockResolvedValue(mockResult);
 
     const response = await request(app).post('/plant-tree').send({
       streetAddress: '123 Main St',
@@ -52,7 +57,7 @@ describe('Server API', () => {
 
   it('should handle planting errors', async () => {
     const error = new Error('Planting failed');
-    plantTree.mockRejectedValue(error);
+    (plantTree as jest.MockedFunction<typeof plantTree>).mockRejectedValue(error);
 
     const response = await request(app).post('/plant-tree').send({ streetAddress: '123 Main St' });
 

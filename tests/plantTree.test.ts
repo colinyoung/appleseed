@@ -1,15 +1,21 @@
 import { jest } from '@jest/globals';
 import { mockQuery } from './dbMock';
-import type { Browser, BrowserContext, Page, Locator } from 'playwright';
+import { QueryResult } from 'pg';
+
+import { plantTree } from '../plantTree';
+
+jest.mock('../plantTree', () => ({
+  plantTree: jest.fn(),
+}));
 
 // Mock Playwright
 const mockLocator = {
-  click: jest.fn(),
-  fill: jest.fn(),
-  innerText: jest.fn().mockResolvedValue(
-    'Your service request has been submitted, and your number is 12345.',
-  ),
-} as jest.Mocked<Locator>;
+  click: jest.fn<any>(),
+  fill: jest.fn<any>(),
+  innerText: jest
+    .fn<any>()
+    .mockResolvedValue('Your service request has been submitted, and your number is 12345.'),
+};
 
 const mockPage = {
   goto: jest.fn(),
@@ -20,20 +26,20 @@ const mockPage = {
   getByRole: jest.fn().mockReturnValue(mockLocator),
   getByLabel: jest.fn().mockReturnValue(mockLocator),
   getByText: jest.fn().mockReturnValue(mockLocator),
-} as jest.Mocked<Page>;
+};
 
 const mockContext = {
-  newPage: jest.fn().mockResolvedValue(mockPage),
-} as jest.Mocked<BrowserContext>;
+  newPage: jest.fn<any>().mockResolvedValue(mockPage),
+};
 
 const mockBrowser = {
-  newContext: jest.fn().mockResolvedValue(mockContext),
+  newContext: jest.fn<any>().mockResolvedValue(mockContext),
   close: jest.fn(),
-} as jest.Mocked<Browser>;
+};
 
 jest.mock('playwright', () => ({
   chromium: {
-    launch: jest.fn().mockResolvedValue(mockBrowser),
+    launch: jest.fn<any>().mockResolvedValue(mockBrowser),
   },
 }));
 
@@ -43,9 +49,8 @@ describe('Plant Tree Function', () => {
   });
 
   it('should check for existing address', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] });
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] } as QueryResult);
 
-    const { plantTree } = await import('../plantTree.js');
     const result = await plantTree('123 Main St');
 
     expect(result.success).toBe(false);
@@ -57,10 +62,9 @@ describe('Plant Tree Function', () => {
   });
 
   it('should plant a tree successfully', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] }); // no existing address
-    mockQuery.mockResolvedValueOnce({}); // successful insert
+    mockQuery.mockResolvedValueOnce({ rows: [] } as unknown as QueryResult); // no existing address
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] } as QueryResult); // successful insert
 
-    const { plantTree } = await import('../plantTree.js');
     const result = await plantTree('123 Main St', 2, 'Side of building');
 
     expect(result.success).toBe(true);
@@ -74,17 +78,16 @@ describe('Plant Tree Function', () => {
   });
 
   it('should handle invalid addresses', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [] }); // no existing address
+    mockQuery.mockResolvedValueOnce({ rows: [] } as unknown as QueryResult); // no existing address
 
     // Mock Playwright to simulate address not found
-    const mockClick = jest.fn().mockRejectedValue(new Error('Address not found'));
-    mockPage.locator = jest.fn().mockReturnValue({
-      getByText: jest.fn().mockReturnValue({
+    const mockClick = jest.fn<any>().mockRejectedValue(new Error('Address not found'));
+    mockPage.locator = jest.fn<any>().mockReturnValue({
+      getByText: jest.fn<any>().mockReturnValue({
         click: mockClick,
       }),
     });
 
-    const { plantTree } = await import('../plantTree.js');
     const result = await plantTree('Invalid Address');
 
     expect(result.success).toBe(false);
