@@ -18,7 +18,7 @@ const plantTreeHandler = async (req: Request<{}, any, PlantTreeRequest>, res: Re
   }
 
   try {
-    const result = await plantTree(streetAddress, numTrees || 1, location || 'Parkway');
+    const result = await plantTree(streetAddress, numTrees ?? 1, location ?? 'Parkway');
     res.json(result);
   } catch (error) {
     res.status(500).json({
