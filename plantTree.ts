@@ -1,6 +1,7 @@
-import { chromium } from 'playwright';
+import { BrowserType } from 'playwright';
 import { logDebug, logInfo } from './logger';
-import db from './db';
+import { DB } from './db';
+import { PlantTreeRequest } from './server';
 
 export type PlantTreeResult = {
   success: boolean;
@@ -9,16 +10,25 @@ export type PlantTreeResult = {
   srNumber?: string;
 };
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) => {
+  if (process.env.NODE_ENV === 'test') {
+    return Promise.resolve();
+  }
+  logDebug(`Delaying for ${ms}ms`);
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
 const maxDelay = 1000;
 const minDelay = 500;
 
-export async function plantTree(address: string, numTrees = 1, description = 'Parkway') {
+export async function plantTree(chromium: BrowserType<{}>, db: DB, request: PlantTreeRequest) {
+  const { address, numTrees = 1, location } = request;
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
   logDebug(`Planting ${numTrees} tree(s) at ${address}`);
-  logDebug(`Location: ${description}`);
+  const locationText =
+    location ?? (numTrees > 2 ? 'Parkway along long side of building' : 'Parkway');
+  logDebug(`Location: ${locationText}`);
 
   try {
     // Check if address exists in database
@@ -66,8 +76,7 @@ export async function plantTree(address: string, numTrees = 1, description = 'Pa
     await where.click();
     logDebug('Clicked where');
 
-    const whereText = numTrees > 2 ? 'Parkway along long side of building' : description;
-    await where.fill(whereText);
+    await where.fill(locationText);
     await page.getByLabel('2. How many trees are you').click();
     await page.getByLabel('2. How many trees are you').fill(numTrees.toString());
     await delay(Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay));
@@ -93,7 +102,7 @@ export async function plantTree(address: string, numTrees = 1, description = 'Pa
         `INSERT INTO tree_requests 
                  (sr_number, street_address, num_trees, location)
                  VALUES ($1, $2, $3, $4)`,
-        [srNumber, address, numTrees, whereText],
+        [srNumber, address, numTrees, locationText],
       );
 
       await browser.close();

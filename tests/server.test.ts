@@ -21,17 +21,17 @@ describe('Server API', () => {
     jest.clearAllMocks();
   });
 
-  it('should require streetAddress', async () => {
+  it('should require address', async () => {
     const response = await request(app).post('/plant-tree').send({});
 
     expect(response.status).toBe(400);
-    expect(response.body.error).toBe('streetAddress is required');
+    expect(response.body.error).toBe('address is required');
   });
 
   it('should plant a tree with default values', async () => {
     const mockResult = { success: true, srNumber: '123', message: 'Tree planted' };
 
-    const response = await request(app).post('/plant-tree').send({ streetAddress: '123 Main St' });
+    const response = await request(app).post('/plant-tree').send({ address: '123 Main St' });
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(mockResult);
@@ -43,7 +43,7 @@ describe('Server API', () => {
     plantTreeMock.mockResolvedValue(mockResult as any);
 
     const response = await request(app).post('/plant-tree').send({
-      streetAddress: '123 Main St',
+      address: '123 Main St',
       numTrees: 2,
       location: 'Side of building',
     });
@@ -57,7 +57,7 @@ describe('Server API', () => {
     const error = new Error('Planting failed');
     plantTreeMock.mockRejectedValue(error);
 
-    const response = await request(app).post('/plant-tree').send({ streetAddress: '123 Main St' });
+    const response = await request(app).post('/plant-tree').send({ address: '123 Main St' });
 
     expect(response.status).toBe(500);
     expect(response.body.error).toBe('Planting failed');

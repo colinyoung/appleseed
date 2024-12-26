@@ -1,11 +1,15 @@
 import { jest } from '@jest/globals';
-import { mockQuery } from './dbMock';
+import dbMock, { mockQuery } from './dbMock';
 import { QueryResult } from 'pg';
 
-import { plantTree } from '../plantTree';
+import { plantTree, PlantTreeResult } from '../plantTree';
+import { PlantTreeRequest } from '../server';
+import { BrowserType } from 'playwright';
+
+const plantTreeMock = jest.fn<(request: PlantTreeRequest) => Promise<PlantTreeResult>>();
 
 jest.mock('../plantTree', () => ({
-  plantTree: jest.fn(),
+  plantTree: plantTreeMock,
 }));
 
 // Mock Playwright
@@ -37,11 +41,9 @@ const mockBrowser = {
   close: jest.fn(),
 };
 
-jest.mock('playwright', () => ({
-  chromium: {
-    launch: jest.fn<any>().mockResolvedValue(mockBrowser),
-  },
-}));
+const chromiumMock: BrowserType<{}> = {
+  launch: jest.fn<any>().mockResolvedValue(mockBrowser),
+} as unknown as BrowserType<{}>;
 
 describe('Plant Tree Function', () => {
   beforeEach(() => {
@@ -49,9 +51,9 @@ describe('Plant Tree Function', () => {
   });
 
   it('should check for existing address', async () => {
-    mockQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] } as QueryResult);
+    mockQuery.mockResolvedValue({ rows: [{ id: 1 }] } as QueryResult);
 
-    const result = await plantTree('123 Main St');
+    const result = await plantTree(chromiumMock, dbMock, { address: '123 Main St' });
 
     expect(result.success).toBe(false);
     expect(result.message).toContain('already exists');
@@ -65,7 +67,11 @@ describe('Plant Tree Function', () => {
     mockQuery.mockResolvedValueOnce({ rows: [] } as unknown as QueryResult); // no existing address
     mockQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] } as QueryResult); // successful insert
 
-    const result = await plantTree('123 Main St', 2, 'Side of building');
+    const result = await plantTree(chromiumMock, dbMock, {
+      address: '123 Main St',
+      numTrees: 2,
+      location: 'Side of building',
+    });
 
     expect(result.success).toBe(true);
     expect(result.srNumber).toBe('12345');
@@ -88,7 +94,7 @@ describe('Plant Tree Function', () => {
       }),
     });
 
-    const result = await plantTree('Invalid Address');
+    const result = await plantTree(chromiumMock, dbMock, { address: 'Invalid address' });
 
     expect(result.success).toBe(false);
     expect(result.message).toContain('Invalid address');
