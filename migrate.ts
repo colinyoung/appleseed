@@ -1,4 +1,4 @@
-import { query } from './db.js';
+import { query } from './db';
 import fs from 'fs';
 import { parse } from 'csv-parse';
 
