@@ -62,13 +62,19 @@ You can create a custom GPT using this project's OpenAPI specification to intera
 2. Create a new GPT in ChatGPT
 3. In the GPT's configuration:
    - Upload the OpenAPI specification
-   - Configure authentication (if required)
+   - Configure authentication
    - Set appropriate action permissions
 
 Example GPT prompts:
 
 ```plaintext
 "Plant a new tree at 1234 W Main St"
+```
+
+This is an example system prompt for your Custom GPT:
+
+```plaintext
+You are a helpful assistant that can plant trees in the City of Chicago. You can plant a tree at a given address and location.
 ```
 
 ## Configuration
