@@ -1,0 +1,78 @@
+openapi: 3.1.0
+info:
+  title: Chicago Tree Planting API
+  description: API for submitting and managing tree planting requests in Chicago
+  version: 1.0.0
+servers:
+  - url: https://chicago-appleseed-183feae15b31.herokuapp.com
+paths:
+  /tree-requests:
+    post:
+      operationId: submitTreeRequest
+      summary: Submit a new tree planting request
+      description: Creates a new tree planting request for a given address
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - streetAddress
+              properties:
+                streetAddress:
+                  type: string
+                  description: The street address where trees should be planted
+                  example: '123 Main St'
+                numTrees:
+                  type: integer
+                  description: Number of trees to plant (defaults to 1)
+                  minimum: 1
+                  default: 1
+                  example: 2
+                location:
+                  type: string
+                  description: Location description for planting (defaults to "Parkway")
+                  default: 'Parkway'
+                  example: 'Side of building'
+      responses:
+        '200':
+          description: Tree planting request submitted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  srNumber:
+                    type: string
+                    description: Service request number
+                    example: 'SR23-02133389'
+                  message:
+                    type: string
+                    example: 'Successfully planted 2 tree(s) at 123 Main St'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'streetAddress is required'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: 'Error during tree planting process'
