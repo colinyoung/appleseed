@@ -1,6 +1,6 @@
 # Appleseed Project
 
-This project provides an API and testing suite for managing and interacting with tree planting data and service requests. It uses Playwright for automated testing and provides an OpenAPI specification that can be used to create custom GPTs.
+This project provides an API, Playwright script, and testing suite for submitting tree planting requests to the City of Chicago.
 
 ## Project Structure
 
