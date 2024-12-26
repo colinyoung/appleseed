@@ -1,8 +1,5 @@
 import { jest } from '@jest/globals';
 
-// Move mocks BEFORE imports
-jest.mock('../db', () => dbMock);
-
 const plantTreeMock =
   jest.fn<
     (request: PlantTreeRequest) => Promise<{ success: boolean; srNumber: string; message: string }>
@@ -14,7 +11,6 @@ jest.mock('../plantTree', () => ({
 // Now do imports
 import request from 'supertest';
 import { app, PlantTreeRequest } from '../server';
-import dbMock from './dbMock';
 
 describe('Server API', () => {
   beforeEach(() => {
