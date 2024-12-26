@@ -30,7 +30,7 @@ const plantTreeHandler = async (req: Request<{}, any, PlantTreeRequest>, res: Re
   }
 };
 
-app.post('/plant-tree', plantTreeHandler as RequestHandler);
+app.post('/tree-requests', plantTreeHandler as RequestHandler);
 
 const port = process.env.PORT || 3000;
 if (process.env.NODE_ENV !== 'test') {

@@ -18,7 +18,7 @@ describe('Server API', () => {
   });
 
   it('should require address', async () => {
-    const response = await request(app).post('/plant-tree').send({});
+    const response = await request(app).post('/tree-requests').send({});
 
     expect(response.status).toBe(400);
     expect(response.body.error).toBe('address is required');
@@ -27,7 +27,7 @@ describe('Server API', () => {
   it('should plant a tree with default values', async () => {
     const mockResult = { success: true, srNumber: '123', message: 'Tree planted' };
 
-    const response = await request(app).post('/plant-tree').send({ address: '123 Main St' });
+    const response = await request(app).post('/tree-requests').send({ address: '123 Main St' });
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(mockResult);
@@ -38,7 +38,7 @@ describe('Server API', () => {
     const mockResult = { success: true, srNumber: '123', message: 'Trees planted' };
     plantTreeMock.mockResolvedValue(mockResult as any);
 
-    const response = await request(app).post('/plant-tree').send({
+    const response = await request(app).post('/tree-requests').send({
       address: '123 Main St',
       numTrees: 2,
       location: 'Side of building',
@@ -53,7 +53,7 @@ describe('Server API', () => {
     const error = new Error('Planting failed');
     plantTreeMock.mockRejectedValue(error);
 
-    const response = await request(app).post('/plant-tree').send({ address: '123 Main St' });
+    const response = await request(app).post('/tree-requests').send({ address: '123 Main St' });
 
     expect(response.status).toBe(500);
     expect(response.body.error).toBe('Planting failed');
