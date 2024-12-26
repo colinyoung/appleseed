@@ -1,21 +1,20 @@
 import { jest } from '@jest/globals';
-import request from 'supertest';
 
-// Import the server code
-import { app } from '../server';
-import { plantTree } from '../plantTree';
+// Move mocks BEFORE imports
+jest.mock('../db', () => dbMock);
 
-jest.mock('../server', () => ({
-  app: {
-    post: jest.fn(),
-    listen: jest.fn(),
-  },
-}));
-
-// Mock the plantTree function
+const plantTreeMock =
+  jest.fn<
+    (request: PlantTreeRequest) => Promise<{ success: boolean; srNumber: string; message: string }>
+  >();
 jest.mock('../plantTree', () => ({
-  plantTree: jest.fn(),
+  plantTree: plantTreeMock,
 }));
+
+// Now do imports
+import request from 'supertest';
+import { app, PlantTreeRequest } from '../server';
+import dbMock from './dbMock';
 
 describe('Server API', () => {
   beforeEach(() => {
@@ -31,18 +30,17 @@ describe('Server API', () => {
 
   it('should plant a tree with default values', async () => {
     const mockResult = { success: true, srNumber: '123', message: 'Tree planted' };
-    (plantTree as jest.MockedFunction<typeof plantTree>).mockResolvedValue(mockResult);
 
     const response = await request(app).post('/plant-tree').send({ streetAddress: '123 Main St' });
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(mockResult);
-    expect(plantTree).toHaveBeenCalledWith('123 Main St', 1, 'Parkway');
+    expect(plantTreeMock).toHaveBeenCalledWith('123 Main St', 1, 'Parkway');
   });
 
   it('should plant trees with custom values', async () => {
     const mockResult = { success: true, srNumber: '123', message: 'Trees planted' };
-    (plantTree as jest.MockedFunction<typeof plantTree>).mockResolvedValue(mockResult);
+    plantTreeMock.mockResolvedValue(mockResult as any);
 
     const response = await request(app).post('/plant-tree').send({
       streetAddress: '123 Main St',
@@ -52,12 +50,12 @@ describe('Server API', () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual(mockResult);
-    expect(plantTree).toHaveBeenCalledWith('123 Main St', 2, 'Side of building');
+    expect(plantTreeMock).toHaveBeenCalledWith('123 Main St', 2, 'Side of building');
   });
 
   it('should handle planting errors', async () => {
     const error = new Error('Planting failed');
-    (plantTree as jest.MockedFunction<typeof plantTree>).mockRejectedValue(error);
+    plantTreeMock.mockRejectedValue(error);
 
     const response = await request(app).post('/plant-tree').send({ streetAddress: '123 Main St' });
 

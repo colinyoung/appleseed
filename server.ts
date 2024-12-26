@@ -1,7 +1,7 @@
 import express, { Request, RequestHandler, Response } from 'express';
-import { plantTree } from './plantTree.js';
+import { plantTree } from './plantTree';
 
-interface PlantTreeRequest {
+export interface PlantTreeRequest {
   streetAddress: string;
   numTrees?: number;
   location?: string;

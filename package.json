@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "tsx migrate.ts && tsx server.ts",
-    "migrate": "tsx migrate.ts",
+    "migrate": "tsx scripts/migrate.ts",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch"
   },

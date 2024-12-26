@@ -1,6 +1,7 @@
-import { query } from './db';
+import { DB } from './db';
 import fs from 'fs';
 import { parse } from 'csv-parse';
+import { logDebug, logError } from './logger';
 
 const CREATE_MIGRATIONS_TABLE = `CREATE TABLE IF NOT EXISTS migrations (
         id SERIAL PRIMARY KEY,
@@ -33,43 +34,43 @@ const migrations = [
   `CREATE INDEX IF NOT EXISTS idx_tree_requests_street_address ON tree_requests(street_address)`,
 ];
 
-export async function runMigration(migration: string, index: number) {
+export async function runMigration(db: DB, migration: string, index: number) {
   try {
     // Check if migration was already executed
-    const migrationCheck = await query('SELECT id FROM migrations WHERE name = $1', [
+    const migrationCheck = await db.query('SELECT id FROM migrations WHERE name = $1', [
       `migration_${index + 1}`,
     ]);
 
     if (migrationCheck.rows.length === 0) {
       // Run migration
-      await query(migration, []);
+      await db.query(migration, []);
 
       // Record migration
-      await query('INSERT INTO migrations (name) VALUES ($1)', [`migration_${index + 1}`]);
+      await db.query('INSERT INTO migrations (name) VALUES ($1)', [`migration_${index + 1}`]);
 
-      console.log(`Migration ${index + 1} executed successfully`);
+      logDebug(`Migration ${index + 1} executed successfully`);
     } else {
-      console.log(`Migration ${index + 1} already executed`);
+      logDebug(`Migration ${index + 1} already executed`);
     }
   } catch (error) {
     if ((error as Error).message.includes('relation "migrations" does not exist')) {
-      console.log('Migrations table does not exist, creating it...');
-      await query(CREATE_MIGRATIONS_TABLE, []);
-      console.log('Migrations table created, now run again');
+      logDebug('Migrations table does not exist, creating it...');
+      await db.query(CREATE_MIGRATIONS_TABLE, []);
+      logDebug('Migrations table created, now run again');
       return;
     } else {
-      console.error(`Error executing migration ${index + 1}:`, error);
+      logError(`Error executing migration ${index + 1}:`, error);
       throw error;
     }
   }
 }
 
-export async function importExistingData() {
+export async function importExistingData(db: DB) {
   const filename = './srNumbers.csv';
 
   try {
     if (!fs.existsSync(filename)) {
-      console.log('No existing data to import');
+      logDebug('No existing data to import');
       return;
     }
 
@@ -95,7 +96,7 @@ export async function importExistingData() {
     // Import records
     for (const record of records) {
       try {
-        await query(
+        await db.query(
           `INSERT INTO tree_requests 
                      (sr_number, street_address, zipcode, num_trees, location, requested_at, confirmed_planted)
                      VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -112,30 +113,28 @@ export async function importExistingData() {
             record['Confirmed Planted'] === 'Yes',
           ],
         );
+        logDebug('Imported record:', record);
       } catch (error) {
         console.error('Error importing record:', record, error);
       }
     }
 
-    console.log(`Imported ${records.length} existing records`);
+    logDebug(`Imported ${records.length} existing records`);
   } catch (error) {
     console.error('Error importing existing data:', error);
   }
 }
 
-export async function migrate() {
-  console.log('Starting database migrations...');
+export async function migrate(db: DB) {
+  logDebug('Starting database migrations...');
 
   for (let i = 0; i < migrations.length; i++) {
-    await runMigration(migrations[i], i);
+    await runMigration(db, migrations[i], i);
   }
 
-  console.log('Migrations completed');
+  logDebug('Migrations completed');
 
-  console.log('Importing existing data...');
-  await importExistingData();
-  console.log('Data import completed');
+  logDebug('Importing existing data...');
+  await importExistingData(db);
+  logDebug('Data import completed');
 }
-
-// Run migrations
-migrate().catch(console.error);

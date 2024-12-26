@@ -1,5 +1,6 @@
 import { chromium } from 'playwright';
-import { query } from './db';
+import { logDebug, logInfo } from './logger';
+import db from './db';
 
 export type PlantTreeResult = {
   success: boolean;
@@ -16,14 +17,15 @@ export async function plantTree(address: string, numTrees = 1, description = 'Pa
   const browser = await chromium.launch();
   const context = await browser.newContext();
   const page = await context.newPage();
-  console.log(`Planting ${numTrees} tree(s) at ${address}`);
-  console.log(`Location: ${description}`);
+  logDebug(`Planting ${numTrees} tree(s) at ${address}`);
+  logDebug(`Location: ${description}`);
 
   try {
     // Check if address exists in database
-    const existingRequest = await query('SELECT id FROM tree_requests WHERE street_address = $1', [
-      address,
-    ]);
+    const existingRequest = await db.query(
+      'SELECT id FROM tree_requests WHERE street_address = $1',
+      [address],
+    );
 
     if (existingRequest.rows.length > 0) {
       await browser.close();
@@ -39,14 +41,14 @@ export async function plantTree(address: string, numTrees = 1, description = 'Pa
     await page.getByPlaceholder('Please enter an address').click();
     await page.getByPlaceholder('Please enter an address').fill(address);
     await delay(Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay));
-    console.log('Filled address');
+    logDebug('Filled address');
 
     try {
       await page
         .locator('div[role=listbox]')
         .getByText(new RegExp(`^${address}`, 'i'))
         .click();
-      console.log('Clicked address');
+      logDebug('Clicked address');
     } catch (e) {
       await browser.close();
       return {
@@ -58,25 +60,25 @@ export async function plantTree(address: string, numTrees = 1, description = 'Pa
 
     await page.getByRole('button', { name: 'Confirm Address' }).click();
     await delay(Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay));
-    console.log('Clicked confirm address');
+    logDebug('Clicked confirm address');
 
     const where = await page.getByLabel('*1. Where would you like the');
     await where.click();
-    console.log('Clicked where');
+    logDebug('Clicked where');
 
     const whereText = numTrees > 2 ? 'Parkway along long side of building' : description;
     await where.fill(whereText);
     await page.getByLabel('2. How many trees are you').click();
     await page.getByLabel('2. How many trees are you').fill(numTrees.toString());
     await delay(Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay));
-    console.log('Filled number of trees');
+    logDebug('Filled number of trees');
 
     await page.getByRole('button', { name: 'next' }).click();
     await page.getByRole('button', { name: 'next' }).click();
     await delay(Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay));
-    console.log('Clicked next');
+    logDebug('Clicked next');
     await page.getByRole('button', { name: 'Finish' }).click();
-    console.log('Clicked finish');
+    logDebug('Clicked finish');
     const text = await page.getByText(
       'Your service request has been submitted, and your number is',
     );
@@ -84,9 +86,10 @@ export async function plantTree(address: string, numTrees = 1, description = 'Pa
 
     if (innerText) {
       const srNumber = innerText.split(' ').pop()?.replace('.', '');
+      logInfo(`Created SR number: ${srNumber}`);
 
       // Store in database
-      await query(
+      await db.query(
         `INSERT INTO tree_requests 
                  (sr_number, street_address, num_trees, location)
                  VALUES ($1, $2, $3, $4)`,
