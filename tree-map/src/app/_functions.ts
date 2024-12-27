@@ -56,7 +56,6 @@ export async function getMarkers(): Promise<Marker[]> {
   const treeRequests = await getTreeRequests();
   const markers: Marker[] = await Promise.all(
     treeRequests.map(async (treeRequest: TreeRequest) => {
-      console.log('Tree request', treeRequest.id, treeRequest.street_address);
       if (treeRequest.latitude && treeRequest.longitude) {
         return {
           longitude: treeRequest.longitude,
@@ -67,11 +66,10 @@ export async function getMarkers(): Promise<Marker[]> {
         };
       }
 
-      // if (treeRequest.geocode_attempted) {
-      //   return null;
-      // }
+      if (treeRequest.geocode_attempted) {
+        return null;
+      }
 
-      console.log('Geocoding address', treeRequest.street_address);
       const coordinates = await geocodeAddress(treeRequest.street_address);
       if (!coordinates) {
         await updateTreeRequest({ id: treeRequest.id, geocodeAttempted: true });

@@ -13,3 +13,7 @@ export default async function Home() {
     </main>
   );
 }
+
+export const runtime = {
+  dynamic: 'force-dynamic',
+};
