@@ -97,32 +97,39 @@ export async function importExistingData(db: DB) {
     });
 
     // Import records
+    let importedCount = 0;
     for (const record of records) {
       try {
-        await db.query(
-          `INSERT INTO tree_requests 
-                     (sr_number, street_address, zipcode, num_trees, location, requested_at, confirmed_planted)
-                     VALUES ($1, $2, $3, $4, $5, $6, $7)
-                     ON CONFLICT (sr_number) DO NOTHING`,
-          [
-            record['SR Number'],
-            record['Address'],
-            record['Zipcode'],
-            parseInt(record['Number Of Trees'] || '1'),
-            record['Location'] || 'Parkway',
-            record['Request Date']
-              ? new Date(record['Request Date']).toISOString()
-              : new Date().toISOString(),
-            record['Confirmed Planted'] === 'Yes',
-          ],
+        const existingRecord = await db.query(
+          `SELECT sr_number FROM tree_requests WHERE sr_number = $1`,
+          [record['SR Number']],
         );
-        logDebug('Imported record:', record);
+
+        if (!existingRecord.rows.length) {
+          await db.query(
+            `INSERT INTO tree_requests 
+                       (sr_number, street_address, zipcode, num_trees, location, requested_at, confirmed_planted)
+                       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+            [
+              record['SR Number'],
+              record['Address'],
+              record['Zipcode'],
+              parseInt(record['Number Of Trees'] || '1'),
+              record['Location'] || 'Parkway',
+              record['Request Date']
+                ? new Date(record['Request Date']).toISOString()
+                : new Date().toISOString(),
+              record['Confirmed Planted'] === 'Yes',
+            ],
+          );
+          importedCount++;
+        }
       } catch (error) {
         console.error('Error importing record:', record, error);
       }
     }
 
-    logDebug(`Imported ${records.length} existing records`);
+    logDebug(`Imported ${importedCount} existing records`);
   } catch (error) {
     console.error('Error importing existing data:', error);
   }

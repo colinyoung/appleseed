@@ -1,9 +1,12 @@
 'use client';
 
-import { Autocomplete } from '@react-google-maps/api';
 import cn from 'clsx';
-import { useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { TreeMapContext } from './_context';
+import { Marker } from '../../types';
+import { geocodeAddress } from './api/tree-requests/_client-functions';
+import { PlaceAutocompleteClassic } from './_visgl-autocomplete';
 
 type TreeRequestResult = {
   srNumber: string;
@@ -12,7 +15,7 @@ type TreeRequestResult = {
   location: string;
 };
 
-async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<TreeRequestResult> {
+async function submitForm(e: React.FormEvent<HTMLFormElement>): Promise<TreeRequestResult> {
   e.preventDefault();
   const formElement = e.target as HTMLFormElement;
   const address = formElement.address.value;
@@ -23,66 +26,75 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<TreeRe
 }
 
 export default function AddTreeRequestForm({
-  onGeocoded,
+  onPlaceSelected,
 }: {
-  onGeocoded: (location: google.maps.LatLngLiteral) => void;
+  onPlaceSelected: (place: google.maps.places.PlaceResult | null) => void;
 }) {
   const [numTrees, setNumTrees] = useState(1);
   const [location, setLocation] = useState('Parkway');
   const [submitting, setSubmitting] = useState(false);
-  const addressInputRef = useRef<HTMLInputElement>(null);
+  const { setMarkers } = useContext(TreeMapContext);
 
-  const geocoder = new google.maps.Geocoder();
-  const commitAddress = () => {
-    const address = addressInputRef.current?.value;
-    if (!address) return;
-    geocoder.geocode({ address }, (results, status) => {
-      if (status === 'OK' && results?.[0]?.geometry?.location) {
-        const location = results[0].geometry.location;
-        onGeocoded({ lat: location.lat(), lng: location.lng() });
+  const [googleLoaded, setGoogleLoaded] = useState(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    if (googleLoaded) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
-    });
-  };
+      return;
+    }
+    intervalRef.current = setInterval(() => {
+      if (window.google) {
+        setGoogleLoaded(true);
+      }
+    }, 100);
+  }, [googleLoaded]);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      setSubmitting(true);
+      try {
+        const result = await submitForm(e);
+        setSubmitting(false);
+
+        const geocodedLocation = await geocodeAddress(result.address);
+        if (!geocodedLocation) return;
+
+        const newMarker: Marker = {
+          address: result.address,
+          numTrees: result.numTrees,
+          location: result.location,
+          longitude: geocodedLocation.longitude,
+          latitude: geocodedLocation.latitude,
+        };
+
+        setMarkers((prevMarkers: Marker[]) => [...prevMarkers, newMarker]);
+
+        toast.success('Tree request created! SR Number: ' + result.srNumber);
+      } catch (error: unknown) {
+        toast.error(
+          `Failed to create tree request. ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [setMarkers],
+  );
 
   return (
     <div className="absolute right-6 top-6 h-screen">
       <div className="flex bg-green-700 dark:bg-green-900 flex-col p-6 w-[500px]">
         <h1 className="text-xl font-bold mb-3">Request another tree</h1>
-        <form
-          className="flex flex-col gap-2"
-          onSubmit={async (e) => {
-            setSubmitting(true);
-            try {
-              const result = await handleSubmit(e);
-              setSubmitting(false);
-              toast.success(`Tree request submitted. SR Number: ${result.srNumber}`);
-            } catch (error: unknown) {
-              toast.error(
-                `Failed to create tree request. ${error instanceof Error ? error.message : 'Unknown error'}`,
-              );
-            } finally {
-              setSubmitting(false);
-            }
-          }}
-        >
+        <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-2">
-            <Autocomplete
-              onLoad={(autocomplete) => {
-                autocomplete.setFields(['address_components', 'formatted_address', 'geometry']);
-              }}
-              restrictions={{ country: 'us' }}
-              onPlaceChanged={() => {
-                commitAddress();
-              }}
-            >
-              <input
-                ref={addressInputRef}
-                type="text"
-                name="address"
-                placeholder="Street Address"
-                className="w-full p-2 rounded-md text-black"
+            {googleLoaded && (
+              <PlaceAutocompleteClassic
+                inputClassName="w-full p-2 rounded-md text-black"
+                onPlaceSelect={onPlaceSelected}
               />
-            </Autocomplete>
+            )}
             <p className="text-sm text-gray-500 dark:text-gray-300">
               You can check the address (and whether there&apos;s already a tree) by zooming in.
             </p>

@@ -1,13 +1,12 @@
 'use client';
 
-import { LoadScript } from '@react-google-maps/api';
 import TreeMap from './_tree-map';
-import { Marker } from '../../types';
+import { APIProvider } from '@vis.gl/react-google-maps';
 
-export default function Content({ markers }: { markers: Marker[] }) {
+export default function Content() {
   return (
-    <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY || ''} libraries={['places']}>
-      <TreeMap markers={markers} />
-    </LoadScript>
+    <APIProvider apiKey={process.env.GOOGLE_MAPS_API_KEY || ''}>
+      <TreeMap />
+    </APIProvider>
   );
 }

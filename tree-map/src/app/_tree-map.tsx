@@ -1,15 +1,11 @@
 'use client';
 
-import { GoogleMap, Marker } from '@react-google-maps/api';
 import AddTreeRequestForm from './_add-tree-request-form';
-import { useRef } from 'react';
+import { ReactElement, useContext, useMemo, useState } from 'react';
+import { TreeMapContext } from './_context';
+import { Map as GoogleMap, AdvancedMarker, useMap, Pin } from '@vis.gl/react-google-maps';
 
-type MarkerProps = {
-  latitude: number;
-  longitude: number;
-};
-
-export default function TreeMap({ markers }: { markers: MarkerProps[] }) {
+export default function TreeMap() {
   const mapStyles = {
     height: '100%',
     width: '100%',
@@ -20,38 +16,68 @@ export default function TreeMap({ markers }: { markers: MarkerProps[] }) {
     lng: -87.6298,
   };
 
-  const mapRef = useRef<GoogleMap>(null);
+  const map = useMap();
 
-  const onGeocoded = (location: google.maps.LatLngLiteral) => {
-    const map = mapRef.current?.getInstance();
+  const { markers } = useContext(TreeMapContext);
+  const [currentPin, setCurrentPin] = useState<ReactElement | null>(null);
+
+  const onPlaceSelected = (place: google.maps.places.PlaceResult | null) => {
     if (!map) return;
-    map.panTo(location);
+    if (!place?.geometry?.location) return;
+
+    map.panTo({
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+    });
     map.setTilt(0);
     map.setZoom(20);
+
+    // Drop a pin at location
+    setCurrentPin(
+      <AdvancedMarker
+        key="current-pin"
+        position={{
+          lat: place.geometry.location.lat(),
+          lng: place.geometry.location.lng(),
+        }}
+      >
+        <Pin background="#000" borderColor="#000" glyphColor="#fff" glyph="M" scale={1} />
+      </AdvancedMarker>,
+    );
   };
+
+  const renderedMarkers = useMemo(
+    () =>
+      markers
+        .map((marker, index) =>
+          marker.latitude && marker.longitude ? (
+            <AdvancedMarker
+              key={index}
+              position={{
+                lat: marker.latitude,
+                lng: marker.longitude,
+              }}
+            />
+          ) : null,
+        )
+        .filter((marker) => marker !== null),
+    [markers],
+  );
 
   return (
     <>
       <GoogleMap
-        ref={mapRef}
-        mapContainerStyle={mapStyles}
-        zoom={12}
-        center={defaultCenter}
-        options={{
-          mapTypeId: 'hybrid', // For satellite + streets view
-        }}
+        mapId="49ae42fed52588c3"
+        mapTypeId="hybrid"
+        disableDefaultUI
+        style={mapStyles}
+        defaultZoom={12}
+        defaultCenter={defaultCenter}
+        gestureHandling="greedy"
       >
-        {markers.map((marker, index) => (
-          <Marker
-            key={index}
-            position={{
-              lat: marker.latitude,
-              lng: marker.longitude,
-            }}
-          />
-        ))}
+        {renderedMarkers.concat(currentPin ? [currentPin] : [])}
       </GoogleMap>
-      <AddTreeRequestForm onGeocoded={onGeocoded} />
+      <AddTreeRequestForm onPlaceSelected={onPlaceSelected} />
     </>
   );
 }
