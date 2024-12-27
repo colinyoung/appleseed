@@ -5,6 +5,7 @@ import { getMarkers } from './_functions';
 
 export default async function Home() {
   const markers = await getMarkers();
+  console.log('Markers', markers.length);
 
   return (
     <main className="flex-1 flex-col h-screen w-full">
