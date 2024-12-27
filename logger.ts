@@ -1,5 +1,5 @@
 export const logDebug = (message: string, ...args: any[]) => {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
     console.log(`[DEBUG] ${message}`, ...args);
   }
 };

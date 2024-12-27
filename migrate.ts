@@ -20,10 +20,13 @@ const migrations = [
         street_address TEXT NOT NULL,
         num_trees INTEGER NOT NULL DEFAULT 1,
         location TEXT NOT NULL,
+        latitude FLOAT,
+        longitude FLOAT,
         requested_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
         status VARCHAR(50) DEFAULT 'completed',
         zipcode VARCHAR(10) DEFAULT '',
         confirmed_planted BOOLEAN DEFAULT FALSE,
+        geocode_attempted BOOLEAN DEFAULT FALSE,
         notes TEXT
     )`,
 
