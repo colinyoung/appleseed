@@ -1,47 +1,57 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useState } from 'react';
-import Map, { Marker, MarkerProps } from 'react-map-gl';
+import { GoogleMap, Marker } from '@react-google-maps/api';
+import AddTreeRequestForm from './_add-tree-request-form';
+import { useRef } from 'react';
 
-function useColorScheme() {
-  const [colorScheme, setColorScheme] = useState('light');
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const updateScheme = (e: MediaQueryListEvent | MediaQueryList) => {
-      setColorScheme(e.matches ? 'dark' : 'light');
-    };
-
-    updateScheme(mediaQuery); // Set initial value
-    mediaQuery.addEventListener('change', updateScheme);
-
-    return () => mediaQuery.removeEventListener('change', updateScheme);
-  }, []);
-
-  return colorScheme;
-}
+type MarkerProps = {
+  latitude: number;
+  longitude: number;
+};
 
 export default function TreeMap({ markers }: { markers: MarkerProps[] }) {
-  const isDarkMode = useColorScheme() === 'dark';
+  const mapStyles = {
+    height: '100%',
+    width: '100%',
+  };
+
+  const defaultCenter = {
+    lat: 41.8781,
+    lng: -87.6298,
+  };
+
+  const mapRef = useRef<GoogleMap>(null);
+
+  const onGeocoded = (location: google.maps.LatLngLiteral) => {
+    const map = mapRef.current?.getInstance();
+    if (!map) return;
+    map.panTo(location);
+    map.setTilt(0);
+    map.setZoom(20);
+  };
+
   return (
-    <Map
-      mapboxAccessToken={process.env.MAPBOX_TOKEN}
-      initialViewState={{
-        longitude: -87.6298,
-        latitude: 41.8781,
-        zoom: 12,
-      }}
-      style={{ width: '100%', height: '100%' }}
-      mapStyle={isDarkMode ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11'}
-    >
-      {markers.map((marker, index) => (
-        <Marker key={index} longitude={marker.longitude} latitude={marker.latitude} anchor="bottom">
-          <div className="text-red-500 text-2xl">📍</div>
-        </Marker>
-      ))}
-    </Map>
+    <>
+      <GoogleMap
+        ref={mapRef}
+        mapContainerStyle={mapStyles}
+        zoom={12}
+        center={defaultCenter}
+        options={{
+          mapTypeId: 'hybrid', // For satellite + streets view
+        }}
+      >
+        {markers.map((marker, index) => (
+          <Marker
+            key={index}
+            position={{
+              lat: marker.latitude,
+              lng: marker.longitude,
+            }}
+          />
+        ))}
+      </GoogleMap>
+      <AddTreeRequestForm onGeocoded={onGeocoded} />
+    </>
   );
 }

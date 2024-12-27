@@ -26,6 +26,7 @@ const migrations = [
         status VARCHAR(50) DEFAULT 'completed',
         zipcode VARCHAR(10) DEFAULT '',
         confirmed_planted BOOLEAN DEFAULT FALSE,
+        geocode_attempted BOOLEAN DEFAULT FALSE,
         notes TEXT
     )`,
 
