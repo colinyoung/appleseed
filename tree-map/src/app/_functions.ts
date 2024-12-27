@@ -70,6 +70,7 @@ export async function getMarkers(): Promise<Marker[]> {
         return null;
       }
 
+      console.log('Geocoding address', treeRequest.street_address);
       const coordinates = await geocodeAddress(treeRequest.street_address);
       if (!coordinates) {
         await updateTreeRequest({ id: treeRequest.id, geocodeAttempted: true });
