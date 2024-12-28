@@ -64,6 +64,8 @@ export default function TreeMap() {
     [markers],
   );
 
+  console.log('Markers', markers.length);
+
   return (
     <>
       <GoogleMap
