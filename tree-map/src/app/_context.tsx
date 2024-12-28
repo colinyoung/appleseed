@@ -25,3 +25,27 @@ export const TreeMapContextProvider = ({
     </TreeMapContext.Provider>
   );
 };
+
+export const OverrideHTMLInputContext = createContext<{
+  overriddenInputValue: string | null;
+  setOverriddenInputValue: (value: string | null) => void;
+}>({
+  overriddenInputValue: null,
+  setOverriddenInputValue: () => {},
+});
+
+export const OverrideHTMLInputContextProvider = ({
+  children,
+  value,
+}: {
+  children: React.ReactNode;
+  value: string | null;
+}) => {
+  return (
+    <OverrideHTMLInputContext.Provider
+      value={{ overriddenInputValue: value, setOverriddenInputValue: () => {} }}
+    >
+      {children}
+    </OverrideHTMLInputContext.Provider>
+  );
+};

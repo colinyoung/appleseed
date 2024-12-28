@@ -41,7 +41,11 @@ export async function POST(request: NextRequest) {
 }
 
 function prepareAddress(address: string): string {
-  if (!address.endsWith('Chicago, IL, USA')) {
+  if (
+    !address.endsWith('Chicago, IL') &&
+    !address.endsWith('Chicago, IL, USA') &&
+    !address.endsWith('Chicago, Illinois, USA')
+  ) {
     throw new Error('Address must be in Chicago');
   }
   const parts = address.split(',')[0].split(' ');
@@ -56,7 +60,7 @@ function prepareAddress(address: string): string {
 
 function streetTypeToAbbreviation(streetType: string): string {
   const streetTypeLower = streetType.toLowerCase();
-  if (streetTypeLower === 'avenue') {
+  if (streetTypeLower === 'avenue' || streetTypeLower === 'ave') {
     return 'Ave';
   }
   if (streetTypeLower === 'street') {
@@ -74,28 +78,28 @@ function streetTypeToAbbreviation(streetType: string): string {
   if (streetTypeLower === 'court') {
     return 'Ct';
   }
-  if (streetTypeLower === 'parkway') {
+  if (streetTypeLower === 'parkway' || streetTypeLower === 'pkwy') {
     return 'Pkwy';
   }
-  if (streetTypeLower === 'expressway') {
+  if (streetTypeLower === 'expressway' || streetTypeLower === 'expwy') {
     return 'Expwy';
   }
-  if (streetTypeLower === 'highway') {
+  if (streetTypeLower === 'highway' || streetTypeLower === 'hwy') {
     return 'Hwy';
   }
-  if (streetTypeLower === 'circle') {
+  if (streetTypeLower === 'circle' || streetTypeLower === 'cir') {
     return 'Cir';
   }
-  if (streetTypeLower === 'terrace') {
+  if (streetTypeLower === 'terrace' || streetTypeLower === 'ter') {
     return 'Ter';
   }
-  if (streetTypeLower === 'boulevard') {
+  if (streetTypeLower === 'boulevard' || streetTypeLower === 'blvd') {
     return 'Blvd';
   }
-  if (streetTypeLower === 'way') {
+  if (streetTypeLower === 'way' || streetTypeLower === 'wy') {
     return 'Way';
   }
-  if (streetTypeLower === 'square') {
+  if (streetTypeLower === 'square' || streetTypeLower === 'sq') {
     return 'Sq';
   }
   return streetType.slice(0, 2);

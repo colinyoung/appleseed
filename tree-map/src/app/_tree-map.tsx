@@ -1,8 +1,8 @@
 'use client';
 
 import AddTreeRequestForm from './_add-tree-request-form';
-import { ReactElement, useContext, useMemo, useState } from 'react';
-import { TreeMapContext } from './_context';
+import { ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { OverrideHTMLInputContextProvider, TreeMapContext } from './_context';
 import { Map as GoogleMap, AdvancedMarker, useMap, Pin } from '@vis.gl/react-google-maps';
 
 export default function TreeMap() {
@@ -21,30 +21,49 @@ export default function TreeMap() {
   const { markers } = useContext(TreeMapContext);
   const [currentPin, setCurrentPin] = useState<ReactElement | null>(null);
 
-  const onPlaceSelected = (place: google.maps.places.PlaceResult | null) => {
-    if (!map) return;
-    if (!place?.geometry?.location) return;
+  const onPlaceSelected = useCallback(
+    (place: google.maps.places.PlaceResult | null) => {
+      if (!map) return;
+      if (!place?.geometry?.location) return;
 
-    map.panTo({
-      lat: place.geometry.location.lat(),
-      lng: place.geometry.location.lng(),
+      map.panTo({
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng(),
+      });
+      map.setTilt(0);
+      map.setZoom(20);
+
+      // Drop a pin at location
+      setCurrentPin(
+        <AdvancedMarker
+          key="current-pin"
+          position={{
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+          }}
+        >
+          <Pin background="#000" borderColor="#000" glyphColor="#fff" glyph="M" scale={1} />
+        </AdvancedMarker>,
+      );
+    },
+    [map],
+  );
+
+  const [overriddenInputValue, setOverriddenInputValue] = useState<string | null>(null);
+  useEffect(() => {
+    map?.addListener('rightclick', (event: google.maps.MapMouseEvent) => {
+      if (!event.latLng) return;
+      map?.setCenter(event.latLng);
+      // reverse geocode
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ location: event.latLng }, (results, status) => {
+        if (status === 'OK' && results?.[0]) {
+          onPlaceSelected(results[0]);
+          setOverriddenInputValue(results[0].formatted_address.replace(/(Chicago, IL).+/, '$1'));
+        }
+      });
     });
-    map.setTilt(0);
-    map.setZoom(20);
-
-    // Drop a pin at location
-    setCurrentPin(
-      <AdvancedMarker
-        key="current-pin"
-        position={{
-          lat: place.geometry.location.lat(),
-          lng: place.geometry.location.lng(),
-        }}
-      >
-        <Pin background="#000" borderColor="#000" glyphColor="#fff" glyph="M" scale={1} />
-      </AdvancedMarker>,
-    );
-  };
+  }, [map, onPlaceSelected]);
 
   const renderedMarkers = useMemo(
     () =>
@@ -77,7 +96,9 @@ export default function TreeMap() {
       >
         {renderedMarkers.concat(currentPin ? [currentPin] : [])}
       </GoogleMap>
-      <AddTreeRequestForm onPlaceSelected={onPlaceSelected} />
+      <OverrideHTMLInputContextProvider value={overriddenInputValue}>
+        <AddTreeRequestForm onPlaceSelected={onPlaceSelected} />
+      </OverrideHTMLInputContextProvider>
     </>
   );
 }

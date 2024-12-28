@@ -83,11 +83,21 @@ export default function AddTreeRequestForm({
     [setMarkers],
   );
 
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <div className="absolute right-6 top-6 h-screen">
-      <div className="flex bg-green-700 dark:bg-green-900 flex-col p-6 w-[500px]">
-        <h1 className="text-xl font-bold mb-3">Request another tree</h1>
-        <form className="flex flex-col gap-2" onSubmit={handleSubmit}>
+      <div className={cn('flex bg-green-700 dark:bg-green-900 flex-col p-6 w-[500px]')}>
+        <div className="flex justify-between flex-row items-center mb-3">
+          <h1 className="text-xl font-bold">Request a tree</h1>
+          <button className="p-4" onClick={() => setCollapsed(!collapsed)}>
+            [{collapsed ? '+' : '-'}]
+          </button>
+        </div>
+        <form
+          className={cn('flex flex-col gap-2', collapsed ? 'hidden' : '')}
+          onSubmit={handleSubmit}
+        >
           <div className="flex flex-col gap-2">
             {googleLoaded && (
               <PlaceAutocompleteClassic
@@ -140,6 +150,17 @@ export default function AddTreeRequestForm({
           {submitting && (
             <p className="text-sm text-white">Requesting from 311...This could take ~10 seconds.</p>
           )}
+          <div className="flex flex-col gap-2 mt-4 border-t border-green-700 pt-2">
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-300 font-bold">Tips:</p>
+            <ul className="text-sm text-gray-500 dark:text-gray-300">
+              <li>• You can right-click on a house to prefill its address.</li>
+              <li>• Yes, you can request a tree on a sidewalk. They&apos;ll cut a hole.</li>
+              <li>
+                • You might want to start in historically industrial neighborhoods, like the
+                South/West Sides.
+              </li>
+            </ul>
+          </div>
         </form>
       </div>
     </div>

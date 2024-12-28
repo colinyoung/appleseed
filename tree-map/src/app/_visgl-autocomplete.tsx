@@ -1,5 +1,6 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useContext } from 'react';
 import { useMapsLibrary } from '@vis.gl/react-google-maps';
+import { OverrideHTMLInputContext } from './_context';
 
 interface Props {
   onPlaceSelect: (place: google.maps.places.PlaceResult | null) => void;
@@ -31,6 +32,15 @@ export const PlaceAutocompleteClassic = ({ onPlaceSelect, inputClassName }: Prop
       onPlaceSelect(placeAutocomplete.getPlace());
     });
   }, [onPlaceSelect, placeAutocomplete]);
+
+  const { overriddenInputValue } = useContext(OverrideHTMLInputContext);
+  useEffect(() => {
+    if (overriddenInputValue) {
+      if (inputRef.current) {
+        inputRef.current.value = overriddenInputValue;
+      }
+    }
+  }, [overriddenInputValue]);
 
   return (
     <div className="autocomplete-container">
