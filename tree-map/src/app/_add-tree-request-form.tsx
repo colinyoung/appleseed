@@ -3,11 +3,14 @@
 import cn from 'clsx';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
+
 import { TreeMapContext } from './_context';
 import { Marker } from '../../types';
 import { geocodeAddress } from './api/tree-requests/_client-functions';
 import { PlaceAutocompleteClassic } from './_visgl-autocomplete';
-
+import Link from 'next/link';
+import Image from 'next/image';
+import { useIsMobile } from './hooks';
 type TreeRequestResult = {
   srNumber: string;
   address: string;
@@ -51,6 +54,26 @@ export default function AddTreeRequestForm({
     }, 100);
   }, [googleLoaded]);
 
+  const [progress, setProgress] = useState(0);
+  useEffect(() => {
+    if (submitting) {
+      const interval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            clearInterval(interval);
+            return prev;
+          }
+          return Math.min(prev + 10, 95);
+        });
+      }, 1250);
+
+      return () => clearInterval(interval);
+    }
+    if (!submitting) {
+      setProgress(0);
+    }
+  }, [submitting]);
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       setSubmitting(true);
@@ -72,6 +95,8 @@ export default function AddTreeRequestForm({
         setMarkers((prevMarkers: Marker[]) => [...prevMarkers, newMarker]);
 
         toast.success('Tree request created! SR Number: ' + result.srNumber);
+        setNumTrees(1);
+        setLocation('Parkway');
       } catch (error: unknown) {
         toast.error(
           `Failed to create tree request. ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -85,20 +110,51 @@ export default function AddTreeRequestForm({
 
   const [collapsed, setCollapsed] = useState(false);
 
+  const isMobile = useIsMobile();
+
   return (
-    <div className="absolute right-6 top-6 h-screen">
-      <div className={cn('flex bg-green-700 dark:bg-green-900 flex-col p-6 w-[500px]')}>
-        <div className="flex justify-between flex-row items-center mb-3">
-          <h1 className="text-xl font-bold">Request a tree</h1>
-          <button className="p-4" onClick={() => setCollapsed(!collapsed)}>
-            [{collapsed ? '+' : '-'}]
-          </button>
+    <div className="md:absolute md:right-6 md:top-6">
+      <div
+        className={cn(
+          'flex bg-green-700 dark:bg-green-900 flex-col p-6 w-full md:w-[500px] md:border-2 md:border-green-800 md:rounded-lg md:shadow-lg',
+        )}
+      >
+        <div className="flex justify-between flex-row items-start">
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row items-center gap-2">
+              <Image
+                src="/dall-e-logo.png"
+                alt="logo (tree in front of city of chicago skyline)"
+                width={32}
+                height={32}
+              />
+
+              <h1 className="text-xl font-bold">Create tree requests for Chicago</h1>
+            </div>
+            <p className="text-md text-gray-500 dark:text-gray-300">
+              {isMobile
+                ? 'Search addresses to add tree requests. '
+                : 'Point, click, and search to add tree requests. '}
+              <Link href="/info">More info</Link>
+            </p>
+          </div>
+          {!isMobile && (
+            <button onClick={() => setCollapsed(!collapsed)}>[{collapsed ? '+' : '-'}]</button>
+          )}
         </div>
+        {isMobile && (
+          <div className="mt-4 bg-orange-700 border-2 border-orange-600 rounded-lg p-2">
+            <p>View on desktop for a much better experience and to see trees on a map.</p>
+          </div>
+        )}
         <form
-          className={cn('flex flex-col gap-2', collapsed ? 'hidden' : '')}
+          className={cn('mt-6 flex flex-col gap-2', collapsed ? 'hidden' : '')}
           onSubmit={handleSubmit}
         >
           <div className="flex flex-col gap-2">
+            <label htmlFor="address" className="text-sm font-bold">
+              Address
+            </label>
             {googleLoaded && (
               <PlaceAutocompleteClassic
                 inputClassName="w-full p-2 rounded-md text-black"
@@ -110,6 +166,9 @@ export default function AddTreeRequestForm({
             </p>
           </div>
           <div className="flex flex-col gap-2">
+            <label htmlFor="numTrees" className="text-sm font-bold">
+              Number of Trees
+            </label>
             <input
               type="number"
               name="numTrees"
@@ -124,9 +183,12 @@ export default function AddTreeRequestForm({
             </p>
           </div>
           <div className="flex flex-col gap-2">
+            <label htmlFor="location" className="text-sm font-bold">
+              Physical location
+            </label>
             <input
               name="location"
-              placeholder="Location"
+              placeholder="Parkway"
               type="text"
               value={location}
               className="w-full p-2 rounded-md text-black"
@@ -134,7 +196,7 @@ export default function AddTreeRequestForm({
             />
             <p className="text-sm text-gray-500 dark:text-gray-300">
               This is almost always best left as the default, &quot;Parkway&quot;, since that&apos;s
-              what we call the area between the sidewalk and the street in Chicago.
+              what we call the city-owned area between the sidewalk and the street in Chicago.
             </p>
           </div>
           <button
@@ -145,16 +207,32 @@ export default function AddTreeRequestForm({
               'disabled:opacity-50 disabled:cursor-not-allowed',
             )}
           >
-            Add Tree Request
+            {submitting ? (
+              <div className="h-6 items-center flex">
+                <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-green-800 w-[100px]">
+                  <div
+                    className="bg-green-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+            ) : (
+              'Create Tree Request'
+            )}
           </button>
           {submitting && (
-            <p className="text-sm text-white">Requesting from 311...This could take ~10 seconds.</p>
+            <p className="flex text-sm text-white w-full">
+              Requesting from 311...This could take ~10 seconds.
+            </p>
           )}
           <div className="flex flex-col gap-2 mt-4 border-t border-green-700 pt-2">
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-300 font-bold">Tips:</p>
             <ul className="text-sm text-gray-500 dark:text-gray-300">
-              <li>• You can right-click on a house to prefill its address.</li>
-              <li>• Yes, you can request a tree on a sidewalk. They&apos;ll cut a hole.</li>
+              {!isMobile && <li>• You can right-click on a house to prefill its address.</li>}
+              <li>
+                • Yes, you can request a tree on a sidewalk, but make sure the sidewalk is wide
+                enough (6 feet). If so, they&apos;ll cut a hole.
+              </li>
               <li>
                 • You might want to start in historically industrial neighborhoods, like the
                 South/West Sides.

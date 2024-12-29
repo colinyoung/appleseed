@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Chicago Tree Map',
-  description: 'Chicago Tree Map',
+  title: 'Chicago Tree Request Map',
+  description: 'Easily request trees in Chicago.',
 };
 
 export default function RootLayout({
@@ -33,7 +33,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <Toaster position="top-right" richColors />
+        <Toaster position="top-left" richColors />
         {children}
       </body>
     </html>

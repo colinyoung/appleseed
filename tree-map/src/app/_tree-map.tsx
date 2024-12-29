@@ -4,11 +4,13 @@ import AddTreeRequestForm from './_add-tree-request-form';
 import { ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { OverrideHTMLInputContextProvider, TreeMapContext } from './_context';
 import { Map as GoogleMap, AdvancedMarker, useMap, Pin } from '@vis.gl/react-google-maps';
+import { useIsMobile } from './hooks';
 
 export default function TreeMap() {
   const mapStyles = {
     height: '100%',
     width: '100%',
+    backgroundColor: 'black',
   };
 
   const defaultCenter = {
@@ -83,19 +85,23 @@ export default function TreeMap() {
     [markers],
   );
 
+  const isMobile = useIsMobile();
+
   return (
     <>
-      <GoogleMap
-        mapId="49ae42fed52588c3"
-        mapTypeId="hybrid"
-        disableDefaultUI
-        style={mapStyles}
-        defaultZoom={12}
-        defaultCenter={defaultCenter}
-        gestureHandling="greedy"
-      >
-        {renderedMarkers.concat(currentPin ? [currentPin] : [])}
-      </GoogleMap>
+      {!isMobile && (
+        <GoogleMap
+          mapId="49ae42fed52588c3"
+          mapTypeId="hybrid"
+          disableDefaultUI
+          style={mapStyles}
+          defaultZoom={12}
+          defaultCenter={defaultCenter}
+          gestureHandling="greedy"
+        >
+          {renderedMarkers.concat(currentPin ? [currentPin] : [])}
+        </GoogleMap>
+      )}
       <OverrideHTMLInputContextProvider value={overriddenInputValue}>
         <AddTreeRequestForm onPlaceSelected={onPlaceSelected} />
       </OverrideHTMLInputContextProvider>
