@@ -66,6 +66,9 @@ function streetTypeToAbbreviation(streetType: string): string {
   if (streetTypeLower === 'street') {
     return 'St';
   }
+  if (streetTypeLower === 'market') {
+    return 'Mkt';
+  }
   if (streetTypeLower === 'road') {
     return 'Rd';
   }
