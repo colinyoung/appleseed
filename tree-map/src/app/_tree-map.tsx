@@ -44,7 +44,7 @@ export default function TreeMap() {
             lng: place.geometry.location.lng(),
           }}
         >
-          <Pin background="#000" borderColor="#000" glyphColor="#fff" glyph="M" scale={1} />
+          <Pin background="#000" borderColor="#000" glyphColor="#fff" glyph="•" scale={1} />
         </AdvancedMarker>,
       );
     },
@@ -78,7 +78,9 @@ export default function TreeMap() {
                 lat: marker.latitude,
                 lng: marker.longitude,
               }}
-            />
+            >
+              <Pin background="green" borderColor="white" glyphColor="#fff" glyph="✓" scale={1} />
+            </AdvancedMarker>
           ) : null,
         )
         .filter((marker) => marker !== null),
