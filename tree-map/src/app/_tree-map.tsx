@@ -51,9 +51,8 @@ export default function TreeMap() {
     [map],
   );
 
-  const [overriddenInputValue, setOverriddenInputValue] = useState<string | null>(null);
-  useEffect(() => {
-    map?.addListener('rightclick', (event: google.maps.MapMouseEvent) => {
+  const reverseGeocode = useCallback(
+    (event: google.maps.MapMouseEvent) => {
       if (!event.latLng) return;
       map?.setCenter(event.latLng);
       // reverse geocode
@@ -64,8 +63,15 @@ export default function TreeMap() {
           setOverriddenInputValue(results[0].formatted_address.replace(/(Chicago, IL).+/, '$1'));
         }
       });
-    });
-  }, [map, onPlaceSelected]);
+    },
+    [map, onPlaceSelected],
+  );
+
+  const [overriddenInputValue, setOverriddenInputValue] = useState<string | null>(null);
+  useEffect(() => {
+    map?.addListener('rightclick', reverseGeocode);
+    map?.addListener('contextmenu', reverseGeocode);
+  }, [map, reverseGeocode]);
 
   const renderedMarkers = useMemo(
     () =>
