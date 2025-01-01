@@ -62,10 +62,13 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
     logDebug('Filled address');
 
     try {
-      await page
+      const candidates = await page
         .locator('div[role=listbox]')
         .getByText(new RegExp(`^${address}`, 'i'))
-        .click({ timeout: DEFAULT_TIMEOUT });
+        .all();
+
+      candidates[0].click({ timeout: DEFAULT_TIMEOUT });
+
       logDebug('Clicked address');
     } catch (e) {
       logError('Error clicking address', e);
