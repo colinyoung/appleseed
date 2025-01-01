@@ -69,7 +69,6 @@ export default function TreeMap() {
 
   const [overriddenInputValue, setOverriddenInputValue] = useState<string | null>(null);
   useEffect(() => {
-    map?.addListener('rightclick', reverseGeocode);
     map?.addListener('contextmenu', reverseGeocode);
   }, [map, reverseGeocode]);
 
