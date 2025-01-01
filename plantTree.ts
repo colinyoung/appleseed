@@ -62,21 +62,11 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
     logDebug('Filled address');
 
     try {
-      const candidates = await page
+      await page
         .locator('div[role=listbox]')
         .getByText(new RegExp(`^${address}`, 'i'))
-        .all();
-      if (candidates.length === 0) {
-        logError('No candidates found for address', address);
-        await browser.close();
-        return {
-          success: false,
-          message: `No candidates found for address: ${address}`,
-        };
-      }
-
-      candidates[0].click({ timeout: DEFAULT_TIMEOUT });
-
+        .first()
+        .click({ timeout: DEFAULT_TIMEOUT });
       logDebug('Clicked address');
     } catch (e) {
       logError('Error clicking address', e);
