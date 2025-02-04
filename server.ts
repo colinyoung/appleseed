@@ -32,7 +32,7 @@ const plantTreeHandler = async (req: Request<{}, any, PlantTreeRequest>, res: Re
 
 app.post('/tree-requests', plantTreeHandler as RequestHandler);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3001;
 if (process.env.NODE_ENV !== 'test') {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);

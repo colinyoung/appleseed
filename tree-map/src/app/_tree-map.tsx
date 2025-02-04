@@ -28,10 +28,6 @@ export default function TreeMap() {
       if (!map) return;
       if (!place?.geometry?.location) return;
 
-      map.panTo({
-        lat: place.geometry.location.lat(),
-        lng: place.geometry.location.lng(),
-      });
       map.setTilt(0);
       map.setZoom(20);
 
@@ -54,7 +50,6 @@ export default function TreeMap() {
   const reverseGeocode = useCallback(
     (event: google.maps.MapMouseEvent) => {
       if (!event.latLng) return;
-      map?.setCenter(event.latLng);
       // reverse geocode
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ location: event.latLng }, (results, status) => {
@@ -64,7 +59,7 @@ export default function TreeMap() {
         }
       });
     },
-    [map, onPlaceSelected],
+    [onPlaceSelected],
   );
 
   const [overriddenInputValue, setOverriddenInputValue] = useState<string | null>(null);
