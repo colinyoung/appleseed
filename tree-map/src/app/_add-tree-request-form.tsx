@@ -132,15 +132,14 @@ export default function AddTreeRequestForm({
 
   const isMobile = useIsMobile();
 
-  const [hasOnboarded, setHasOnboarded] = useState(
-    typeof window !== 'undefined' && localStorage.getItem('hasOnboarded') === 'true',
-  );
+  const [hasOnboarded, setHasOnboarded] = useState(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      localStorage.setItem('hasOnboarded', hasOnboarded.toString());
+      const onboardedStatus = localStorage.getItem('hasOnboarded') === 'true';
+      setHasOnboarded(onboardedStatus);
     }
-  }, [hasOnboarded]);
+  }, []);
 
   return (
     <div className="md:absolute md:right-6 md:top-6 md:bottom-18 md:max-h-[90vh]">

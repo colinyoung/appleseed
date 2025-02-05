@@ -117,6 +117,11 @@ export default function TreeMap() {
   );
 
   const isMobile = useIsMobile();
+  const [isFormVisible, setIsFormVisible] = useState(false);
+
+  useEffect(() => {
+    setIsFormVisible(true);
+  }, []);
 
   return (
     <>
@@ -148,11 +153,15 @@ export default function TreeMap() {
         </GoogleMap>
       )}
       <OverrideHTMLInputContextProvider value={overriddenInputValue}>
-        <AddTreeRequestForm
-          onPlaceSelected={onPlaceSelectedFromAddress}
-          lat={currentXMark?.lat}
-          lng={currentXMark?.lng}
-        />
+        <div
+          className={`transition-opacity duration-300 ${isFormVisible ? 'opacity-100' : 'opacity-0'}`}
+        >
+          <AddTreeRequestForm
+            onPlaceSelected={onPlaceSelectedFromAddress}
+            lat={currentXMark?.lat}
+            lng={currentXMark?.lng}
+          />
+        </div>
       </OverrideHTMLInputContextProvider>
     </>
   );
