@@ -228,15 +228,19 @@ export default function AddTreeRequestForm({
           <div className="flex flex-col gap-2 mt-4 border-t border-green-700 pt-2">
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-300 font-bold">Tips:</p>
             <ul className="text-sm text-gray-500 dark:text-gray-300">
-              <li>
+              <li className="mb-2">
                 We have some <a href="/info#examples">good examples of spots to plant here</a>.
               </li>
-              {!isMobile && <li>• You can right-click on a house to prefill its address.</li>}
-              <li>
+              {!isMobile && (
+                <li className="mb-2">
+                  Right-click on a tree&apos;s location in the parkway to prefill its address.
+                </li>
+              )}
+              <li className="mb-2">
                 • Yes, you can request a tree on a sidewalk, but make sure the sidewalk is wide
                 enough (6 feet). If so, they&apos;ll cut a hole.
               </li>
-              <li>
+              <li className="mb-2">
                 • You might want to start in historically industrial neighborhoods, like the
                 South/West Sides.
               </li>
