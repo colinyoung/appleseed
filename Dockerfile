@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/playwright:v1.49.1-jammy
 WORKDIR /app
 
 COPY package*.json ./
-RUN corepack enable
+RUN corepack disable && npm install -g pnpm@latest
 RUN corepack prepare pnpm@9.1.0 --activate
 RUN pnpm install
 
