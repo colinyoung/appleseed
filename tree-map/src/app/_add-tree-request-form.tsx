@@ -91,7 +91,6 @@ export default function AddTreeRequestForm({
         const result = await submitForm(e);
         setSubmitting(false);
 
-        console.log('Result', result);
         if (result.alreadyExists) {
           toast.warning('Tree request already exists. Please try again.');
           return;
@@ -296,7 +295,6 @@ async function createTreeRequest({
     body: JSON.stringify({ address, numTrees, location, lat, lng }),
   });
   const data = await response.json();
-  console.log('Data', data);
   if (data.error) {
     throw new Error(data.error);
   }
