@@ -90,9 +90,9 @@ export default function TreeMap() {
 
   const renderedMarkers = useMemo(
     () =>
-      markers
-        .map((marker, index) =>
-          marker.latitude && marker.longitude ? (
+      markers.reduce((acc, marker, index) => {
+        if (marker.latitude && marker.longitude) {
+          acc.push(
             <AdvancedMarker
               key={index}
               position={{
@@ -101,10 +101,18 @@ export default function TreeMap() {
               }}
             >
               <Pin background="green" borderColor="white" glyphColor="#fff" glyph="✓" scale={1} />
-            </AdvancedMarker>
-          ) : null,
-        )
-        .filter((marker) => marker !== null),
+            </AdvancedMarker>,
+          );
+        }
+        if (typeof marker.lat === 'number' && typeof marker.lng === 'number') {
+          acc.push(
+            <AdvancedMarker key={index + '-point'} position={{ lat: marker.lat, lng: marker.lng }}>
+              <Pin background="#ffffff0a" borderColor="white" glyph="🌳" scale={1} />
+            </AdvancedMarker>,
+          );
+        }
+        return acc;
+      }, [] as ReactElement[]),
     [markers],
   );
 

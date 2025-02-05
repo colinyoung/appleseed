@@ -4,6 +4,8 @@ export type Marker = {
   address: string;
   numTrees: number;
   location: string;
+  lat?: number;
+  lng?: number;
 };
 
 export type TreeRequest = {
@@ -14,4 +16,6 @@ export type TreeRequest = {
   num_trees: number;
   location: string;
   geocode_attempted: boolean;
+  lat?: number;
+  lng?: number;
 };

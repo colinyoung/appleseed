@@ -56,6 +56,7 @@ export async function getMarkers(): Promise<Marker[]> {
   const treeRequests = await getTreeRequests();
   const markers: Marker[] = await Promise.all(
     treeRequests.map(async (treeRequest: TreeRequest) => {
+      // Already geocoded.
       if (treeRequest.latitude && treeRequest.longitude) {
         return {
           longitude: treeRequest.longitude,
@@ -63,6 +64,8 @@ export async function getMarkers(): Promise<Marker[]> {
           address: treeRequest.street_address,
           numTrees: treeRequest.num_trees,
           location: treeRequest.location,
+          lat: treeRequest.lat,
+          lng: treeRequest.lng,
         };
       }
 
@@ -86,6 +89,8 @@ export async function getMarkers(): Promise<Marker[]> {
         address: treeRequest.street_address,
         numTrees: treeRequest.num_trees,
         location: treeRequest.location,
+        lat: treeRequest.lat,
+        lng: treeRequest.lng,
       };
       return marker;
     }),
