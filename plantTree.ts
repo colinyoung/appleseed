@@ -1,5 +1,5 @@
 import { BrowserType } from 'playwright';
-import { logDebug, logError, logInfo } from './logger';
+import { logError, logInfo } from './logger';
 import { DB } from './db';
 import { PlantTreeRequest } from './server';
 
@@ -15,7 +15,7 @@ const delay = () => {
     return Promise.resolve();
   }
   const ms = Math.floor(Math.random() * (maxDelay - minDelay + 1) + minDelay);
-  logDebug(`Delaying for ${ms}ms`);
+  logInfo(`Delaying for ${ms}ms`);
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 const maxDelay = 500;
@@ -31,10 +31,10 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
     acceptDownloads: false,
   });
   const page = await context.newPage();
-  logDebug(`Planting ${numTrees} tree(s) at ${address}`);
+  logInfo(`Planting ${numTrees} tree(s) at ${address}`);
   const locationText =
     location ?? (numTrees > 2 ? 'Parkway along long side of building' : 'Parkway');
-  logDebug(`Location: ${locationText}`);
+  logInfo(`Location: ${locationText}`);
 
   try {
     // Check if address exists in database
@@ -59,7 +59,7 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
       .getByPlaceholder('Please enter an address')
       .fill(address, { timeout: DEFAULT_TIMEOUT });
     await delay();
-    logDebug('Filled address');
+    logInfo('Filled address');
 
     try {
       await page
@@ -67,7 +67,7 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
         .getByText(new RegExp(`^${address}`, 'i'))
         .first()
         .click({ timeout: DEFAULT_TIMEOUT });
-      logDebug('Clicked address');
+      logInfo('Clicked address');
     } catch (e) {
       logError('Error clicking address', e);
       await browser.close();
@@ -80,11 +80,11 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
 
     await page.getByRole('button', { name: 'Confirm Address' }).click({ timeout: DEFAULT_TIMEOUT });
     await delay();
-    logDebug('Clicked confirm address');
+    logInfo('Clicked confirm address');
 
     const where = await page.getByLabel('*1. Where would you like the');
     await where.click({ timeout: DEFAULT_TIMEOUT });
-    logDebug('Clicked where');
+    logInfo('Clicked where');
 
     await where.fill(locationText);
     await page.getByLabel('2. How many trees are you').click({ timeout: DEFAULT_TIMEOUT });
@@ -92,14 +92,14 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
       .getByLabel('2. How many trees are you')
       .fill(numTrees.toString(), { timeout: DEFAULT_TIMEOUT });
     await delay();
-    logDebug('Filled number of trees');
+    logInfo('Filled number of trees');
 
     await page.getByRole('button', { name: 'next' }).click({ timeout: DEFAULT_TIMEOUT });
     await page.getByRole('button', { name: 'next' }).click({ timeout: DEFAULT_TIMEOUT });
     await delay();
-    logDebug('Clicked next');
+    logInfo('Clicked next');
     await page.getByRole('button', { name: 'Finish' }).click({ timeout: DEFAULT_TIMEOUT });
-    logDebug('Clicked finish');
+    logInfo('Clicked finish');
     const text = await page.getByText(
       'Your service request has been submitted, and your number is',
     );

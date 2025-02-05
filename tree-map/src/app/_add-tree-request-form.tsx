@@ -90,6 +90,11 @@ export default function AddTreeRequestForm({
         const result = await submitForm(e);
         setSubmitting(false);
 
+        if (!result.srNumber) {
+          toast.error('Failed to create tree request. Please try again.');
+          return;
+        }
+
         const geocodedLocation = await geocodeAddress(result.address);
         if (!geocodedLocation) return;
 
