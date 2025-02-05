@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Info() {
@@ -10,14 +11,55 @@ export default function Info() {
         <h1 className="text-2xl font-bold mt-6">Info</h1>
         <p>
           This is an interactive map of Chicago where you can request trees anonymously via 311. You
-          can right-click to{' '}
-          <a href="https://en.wikipedia.org/wiki/Reverse_geocoding">reverse-geocode</a> an address.
-          Mobile is not yet supported, nor is batch-requesting, though both are coming soon.
+          can right-click on good tree locations to{' '}
+          <a href="https://en.wikipedia.org/wiki/Reverse_geocoding">reverse-geocode</a> an address
+          and request a tree/trees. You can only request one tree at a time, though batch-requesting
+          is coming soon. (It doesn&apos;t hurt that this rate-limits things for now).
         </p>
+        <h2 className="text-xl font-bold mt-4">Planting a tree</h2>
+        <p>
+          Right-click where the tree should go (
+          <a href="#machine-learning">the more precisely, the better</a>). Two pins will be dropped:
+          One marking the spot, and another marking the property.
+        </p>
+        <p>
+          Good tree locations are where the parkway is wide enough, not a driveway or bus stop, and
+          visibly clear with no tree (small, freshly planted ones can be hard to spot).
+        </p>
+        <details className="mb-4">
+          <summary className="cursor-pointer hover:text-gray-600">✅ Good tree locations</summary>
+          <figure className="mt-2 inline-block">
+            <Image
+              src="/assets/locations.png"
+              alt="Indicating where a user should click to request a tree"
+              width={364}
+              height={440}
+            />
+            <figcaption className="text-sm text-gray-500 text-bold text-center p-2 inline-block">
+              Good locations are grass parkways or sidewalks (wide enough, about as wide as a car).
+            </figcaption>
+          </figure>
+        </details>
+        <details className="mb-4">
+          <summary className="cursor-pointer hover:text-gray-600">❌ Bad tree locations</summary>
+          <figure className="mt-2 inline-block">
+            <Image
+              src="/assets/donot.png"
+              alt="Indicating where a user should NOT request a tree"
+              width={364}
+              height={440}
+            />
+            <figcaption className="text-sm text-gray-500 text-bold text-center p-2 inline-block">
+              Bad locations are driveways, bus stops, or areas with existing trees.
+            </figcaption>
+          </figure>
+        </details>
+        <h2 className="text-xl font-bold mt-4">Requesting trees</h2>
         <p>
           While you can request trees yourself via{' '}
           <a href="https://311.chicago.gov">311.chicago.gov</a>, this is a much easier way to
-          request: you can search addresses or right-click on the map wherever you want a tree.
+          request: you can search addresses or right-click on the map wherever you want a tree (
+          <a href="#machine-learning">suggested method</a>).
         </p>
         <p>
           You shouldn&apos;t expect trees to physically be planted quickly, but generally, they take
@@ -54,6 +96,13 @@ export default function Info() {
           city should have an opt-out program and plant trees on a grid system, prioritizing less
           forested neighborhoods, until &quot;done&quot;. Until then, using this map (when
           you&apos;re bored or motivated) is a good way to help the city plant more trees.
+        </p>
+        <h2 className="text-xl font-bold mt-4">Machine learning</h2>
+        <p>
+          Right-clicks will store requests annotated with the precise location of the click. In the
+          future, this may be used to train a future machine learning vision model (which will be
+          open-sourced) to identify good locations for trees, potentially to be used citywide or
+          even in other cities. By using this site, you consent to that.
         </p>
         <h2 className="text-xl font-bold mt-4">FAQs</h2>
         <p>
@@ -92,7 +141,8 @@ export default function Info() {
           <a href="https://playwright.dev">Playwright</a>.
         </p>
         <p>
-          For API access, please write to <a href="mailto:me@colinyoung.com">me@colinyoung.com</a>.
+          For API access, please write to <a href="mailto:me@colinyoung.com">me@colinyoung.com</a>{' '}
+          or contact me on <a href="https://bsky.app/profile/colinyoung.com">Bluesky</a>.
         </p>
       </div>
     </div>
