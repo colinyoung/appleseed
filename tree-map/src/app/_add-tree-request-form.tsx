@@ -145,7 +145,7 @@ export default function AddTreeRequestForm({
     <div className="md:absolute md:right-6 md:top-6 md:bottom-18 md:max-h-[90vh]">
       <div
         className={cn(
-          'flex bg-green-700 dark:bg-green-900 flex-col p-6 w-full md:w-[500px] md:border-2 md:border-green-800 md:rounded-lg md:shadow-lg',
+          'flex bg-green-900 flex-col p-6 w-full md:w-[500px] md:border-2 md:border-green-800 md:rounded-lg md:shadow-lg',
           'md:max-h-full md:h-full overflow-y-auto',
         )}
       >
@@ -161,7 +161,7 @@ export default function AddTreeRequestForm({
 
               <h1 className="text-xl font-bold">Create tree requests for Chicago</h1>
             </div>
-            <p className="text-md text-gray-500 dark:text-gray-300">
+            <p className="text-md text-gray-300">
               {isMobile
                 ? 'Search addresses to add tree requests. '
                 : 'Point, right-click, and search to add tree requests. '}
@@ -193,7 +193,7 @@ export default function AddTreeRequestForm({
                 onPlaceSelect={onPlaceSelected}
               />
             )}
-            <p className="text-sm text-gray-500 dark:text-gray-300">
+            <p className="text-sm text-gray-300">
               You can check the address (and whether there&apos;s already a tree) by zooming in.
             </p>
           </div>
@@ -209,7 +209,7 @@ export default function AddTreeRequestForm({
               onChange={(e) => setNumTrees(parseInt(e.target.value))}
               className="w-full p-2 rounded-md text-black"
             />
-            <p className="text-sm text-gray-500 dark:text-gray-300">
+            <p className="text-sm text-gray-300">
               Only request more than one tree if you have a specific reason (i.e. building is on a
               corner)
             </p>
@@ -226,7 +226,7 @@ export default function AddTreeRequestForm({
               className="w-full p-2 rounded-md text-black"
               onChange={(e) => setLocation(e.target.value)}
             />
-            <p className="text-sm text-gray-500 dark:text-gray-300">
+            <p className="text-sm text-gray-300">
               This is almost always best left as the default, &quot;Parkway&quot;, since that&apos;s
               what we call the city-owned area between the sidewalk and the street in Chicago.
             </p>
@@ -243,7 +243,7 @@ export default function AddTreeRequestForm({
           >
             {submitting ? (
               <div className="h-6 items-center flex w-[100px]">
-                <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-green-800">
+                <div className="w-full rounded-full h-2.5 bg-green-800">
                   <div
                     className="bg-green-600 h-2.5 rounded-full transition-all duration-500 ease-out"
                     style={{ width: `${progress}%` }}
@@ -260,8 +260,8 @@ export default function AddTreeRequestForm({
             </p>
           )}
           <div className="flex flex-col gap-2 mt-4 border-t border-green-700 pt-2">
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-300 font-bold">Tips:</p>
-            <ul className="text-sm text-gray-500 dark:text-gray-300">
+            <p className="mt-2 text-sm text-gray-300 font-bold">Tips:</p>
+            <ul className="text-sm text-gray-300">
               <li className="mb-2">
                 We have some <a href="/info#examples">good examples of spots to plant here</a>.
               </li>
