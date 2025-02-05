@@ -344,7 +344,12 @@ function Onboarding({ setHasOnboarded }: { setHasOnboarded: (hasOnboarded: boole
         <video src="/assets/create.mp4" muted loop className="w-full rounded-lg" />
       </div>
       <div className="flex flex-row justify-end items-center gap-2">
-        <button className="bg-gray-800 text-white p-2 rounded-md">Open Video</button>
+        <button
+          className="bg-gray-800 text-white p-2 rounded-md"
+          onClick={() => setIsVideoFullscreen(true)}
+        >
+          Open Video
+        </button>
       </div>
 
       {isVideoFullscreen && (
