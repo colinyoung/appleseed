@@ -50,6 +50,20 @@ export default function TreeMap() {
     [map],
   );
 
+  const onPlaceSelectedFromAddress = useCallback(
+    (place: google.maps.places.PlaceResult | null) => {
+      if (!map) return;
+      if (!place?.geometry?.location) return;
+
+      map.setTilt(0);
+      map.setZoom(20);
+      map.setCenter(place.geometry.location);
+
+      onPlaceSelected(place);
+    },
+    [map, onPlaceSelected],
+  );
+
   const [currentXMark, setCurrentXMark] = useState<{ lat: number; lng: number } | null>(null);
 
   const reverseGeocode = useCallback(
@@ -126,7 +140,7 @@ export default function TreeMap() {
         </GoogleMap>
       )}
       <OverrideHTMLInputContextProvider value={overriddenInputValue}>
-        <AddTreeRequestForm onPlaceSelected={onPlaceSelected} />
+        <AddTreeRequestForm onPlaceSelected={onPlaceSelectedFromAddress} />
       </OverrideHTMLInputContextProvider>
     </>
   );
