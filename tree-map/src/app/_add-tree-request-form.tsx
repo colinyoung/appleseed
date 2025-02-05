@@ -159,17 +159,21 @@ export default function AddTreeRequestForm({
                 height={32}
               />
 
-              <h1 className="text-xl font-bold">Create tree requests for Chicago</h1>
+              <h1 className="text-xl font-bold text-white">Create tree requests for Chicago</h1>
             </div>
             <p className="text-md text-gray-300">
               {isMobile
                 ? 'Search addresses to add tree requests. '
                 : 'Point, right-click, and search to add tree requests. '}
-              <Link href="/info">More...</Link>
+              <Link className="text-white" href="/info">
+                More...
+              </Link>
             </p>
           </div>
           {!isMobile && (
-            <button onClick={() => setCollapsed(!collapsed)}>[{collapsed ? '+' : '-'}]</button>
+            <button className="text-white" onClick={() => setCollapsed(!collapsed)}>
+              [{collapsed ? '+' : '-'}]
+            </button>
           )}
         </div>
         {isMobile && (
@@ -184,7 +188,7 @@ export default function AddTreeRequestForm({
           onSubmit={handleSubmit}
         >
           <div className="flex flex-col gap-2">
-            <label htmlFor="address" className="text-sm font-bold">
+            <label htmlFor="address" className="text-sm font-bold text-white">
               Address
             </label>
             {googleLoaded && (
@@ -198,7 +202,7 @@ export default function AddTreeRequestForm({
             </p>
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="numTrees" className="text-sm font-bold">
+            <label htmlFor="numTrees" className="text-sm font-bold text-white">
               Number of Trees
             </label>
             <input
@@ -215,7 +219,7 @@ export default function AddTreeRequestForm({
             </p>
           </div>
           <div className="flex flex-col gap-2">
-            <label htmlFor="location" className="text-sm font-bold">
+            <label htmlFor="location" className="text-sm font-bold text-white">
               Physical location
             </label>
             <input
@@ -263,7 +267,11 @@ export default function AddTreeRequestForm({
             <p className="mt-2 text-sm text-gray-300 font-bold">Tips:</p>
             <ul className="text-sm text-gray-300">
               <li className="mb-2">
-                We have some <a href="/info#examples">good examples of spots to plant here</a>.
+                We have some{' '}
+                <a className="text-white" href="/info#examples">
+                  good examples of spots to plant here
+                </a>
+                .
               </li>
               {!isMobile && (
                 <li className="mb-2">
