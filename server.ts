@@ -7,20 +7,22 @@ export interface PlantTreeRequest {
   address: string;
   numTrees?: number;
   location?: string;
+  lat: number;
+  lng: number;
 }
 
 export const app = express();
 app.use(express.json());
 
 const plantTreeHandler = async (req: Request<{}, any, PlantTreeRequest>, res: Response) => {
-  const { address, numTrees, location } = req.body;
+  const { address, numTrees, location, lat, lng } = req.body;
 
   if (!address) {
     return res.status(400).json({ error: 'address is required' });
   }
 
   try {
-    const result = await plantTree(chromium, db, { address, numTrees, location });
+    const result = await plantTree(chromium, db, { address, numTrees, location, lat, lng });
     res.json(result);
   } catch (error) {
     res.status(500).json({

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { address, numTrees, location } = await request.json();
+    const { address, numTrees, location, lat, lng } = await request.json();
 
     // TODO: Add validation
     if (!address || !numTrees) {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ address: formattedAddress, numTrees, location }),
+      body: JSON.stringify({ address: formattedAddress, numTrees, location, lat, lng }),
     });
     const data = await response.json();
     if (data.error) {
@@ -31,8 +31,11 @@ export async function POST(request: NextRequest) {
       numTrees,
       location,
       srNumber: data.srNumber,
+      lat,
+      lng,
     });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 },

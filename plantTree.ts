@@ -25,7 +25,7 @@ const DEFAULT_TIMEOUT = 5000;
 
 export async function plantTree(chromium: BrowserType<{}>, db: DB, request: PlantTreeRequest) {
   validateRequest(request);
-  const { address, numTrees = 1, location } = request;
+  const { address, numTrees = 1, location, lat, lng } = request;
   const browser = await chromium.launch();
   const context = await browser.newContext({
     acceptDownloads: false,
@@ -112,9 +112,9 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
       // Store in database
       await db.query(
         `INSERT INTO tree_requests 
-                 (sr_number, street_address, num_trees, location)
-                 VALUES ($1, $2, $3, $4)`,
-        [srNumber, address, numTrees, locationText],
+                 (sr_number, street_address, num_trees, location, lat, lng)
+                 VALUES ($1, $2, $3, $4, $5, $6)`,
+        [srNumber, address, numTrees, locationText, lat, lng],
       );
 
       await browser.close();

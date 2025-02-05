@@ -35,6 +35,10 @@ const migrations = [
 
   // Create index on street_address
   `CREATE INDEX IF NOT EXISTS idx_tree_requests_street_address ON tree_requests(street_address)`,
+
+  // Add lat and lng columns if they don't exist
+  `ALTER TABLE tree_requests ADD COLUMN IF NOT EXISTS lat FLOAT`,
+  `ALTER TABLE tree_requests ADD COLUMN IF NOT EXISTS lng FLOAT`,
 ];
 
 export async function runMigration(db: DB, migration: string, index: number) {

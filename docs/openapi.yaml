@@ -35,6 +35,14 @@ paths:
                   description: Location description for planting (defaults to "Parkway")
                   default: 'Parkway'
                   example: 'Side of building'
+                lat:
+                  type: number
+                  description: Latitude of the planting location
+                  example: 41.8781
+                lng:
+                  type: number
+                  description: Longitude of the planting location
+                  example: -87.6298
       responses:
         '200':
           description: Tree planting request submitted successfully

@@ -11,8 +11,12 @@
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
     "web:dev": "cd tree-map && pnpm dev"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "appleseed",
+    "tree-planting",
+    "chicago"
+  ],
+  "author": "Colin Young <me@colinyoung.com>",
   "license": "ISC",
   "dependencies": {
     "csv-parse": "^5.5.5",

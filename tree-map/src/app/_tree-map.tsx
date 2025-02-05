@@ -29,7 +29,10 @@ export default function TreeMap() {
       if (!place?.geometry?.location) return;
 
       map.setTilt(0);
-      map.setZoom(20);
+      const zoom = map.getZoom();
+      if (zoom && zoom < 20) {
+        map.setZoom(20);
+      }
 
       // Drop a pin at location
       setCurrentPin(
@@ -47,9 +50,13 @@ export default function TreeMap() {
     [map],
   );
 
+  const [currentXMark, setCurrentXMark] = useState<{ lat: number; lng: number } | null>(null);
+
   const reverseGeocode = useCallback(
     (event: google.maps.MapMouseEvent) => {
       if (!event.latLng) return;
+
+      setCurrentXMark({ lat: event.latLng.lat(), lng: event.latLng.lng() });
       // reverse geocode
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ location: event.latLng }, (results, status) => {
@@ -102,6 +109,20 @@ export default function TreeMap() {
           gestureHandling="greedy"
         >
           {renderedMarkers.concat(currentPin ? [currentPin] : [])}
+          {currentXMark && (
+            <AdvancedMarker
+              key="current-x-mark"
+              position={{ lat: currentXMark.lat, lng: currentXMark.lng }}
+            >
+              <Pin
+                background="darkgreen"
+                borderColor="green"
+                glyphColor="#fff"
+                glyph="🌳"
+                scale={1}
+              />
+            </AdvancedMarker>
+          )}
         </GoogleMap>
       )}
       <OverrideHTMLInputContextProvider value={overriddenInputValue}>
