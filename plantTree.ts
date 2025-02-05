@@ -48,6 +48,7 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
       return {
         success: false,
         message: `Address ${address} already exists in records`,
+        alreadyExists: true,
       };
     }
     await page.goto(
@@ -110,11 +111,12 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
       logInfo(`Created SR number: ${srNumber}`);
 
       // Store in database
+      console.log('Inserting into database', srNumber, address, numTrees, locationText, lat, lng);
       await db.query(
         `INSERT INTO tree_requests 
                  (sr_number, street_address, num_trees, location, lat, lng)
                  VALUES ($1, $2, $3, $4, $5, $6)`,
-        [srNumber, address, numTrees, locationText, lat, lng],
+        [srNumber, address, numTrees, locationText, lat ?? null, lng ?? null],
       );
 
       await browser.close();

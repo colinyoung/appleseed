@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       srNumber: data.srNumber,
       lat,
       lng,
+      alreadyExists: data.alreadyExists,
     });
   } catch (error) {
     console.error(error);

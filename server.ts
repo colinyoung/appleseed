@@ -9,6 +9,7 @@ export interface PlantTreeRequest {
   location?: string;
   lat: number;
   lng: number;
+  alreadyExists?: boolean;
 }
 
 export const app = express();
