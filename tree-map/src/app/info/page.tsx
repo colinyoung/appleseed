@@ -22,11 +22,14 @@ export default function Info() {
           <a href="#machine-learning">the more precisely, the better</a>). Two pins will be dropped:
           One marking the spot, and another marking the property.
         </p>
+        <h2 id="examples" className="text-xl font-bold mt-4">
+          Examples
+        </h2>
         <p>
           Good tree locations are where the parkway is wide enough, not a driveway or bus stop, and
           visibly clear with no tree (small, freshly planted ones can be hard to spot).
         </p>
-        <details className="mb-4">
+        <details className="mb-2">
           <summary className="cursor-pointer hover:text-gray-600">✅ Good tree locations</summary>
           <figure className="mt-2 inline-block">
             <Image
@@ -40,7 +43,7 @@ export default function Info() {
             </figcaption>
           </figure>
         </details>
-        <details className="mb-4">
+        <details className="mb-2">
           <summary className="cursor-pointer hover:text-gray-600">❌ Bad tree locations</summary>
           <figure className="mt-2 inline-block">
             <Image
@@ -58,7 +61,7 @@ export default function Info() {
         <p>
           While you can request trees yourself via{' '}
           <a href="https://311.chicago.gov">311.chicago.gov</a>, this is a much easier way to
-          request: you can search addresses or right-click on the map wherever you want a tree (
+          request: you can search addresses or right-click on the map wherever you want a tree ( the{' '}
           <a href="#machine-learning">suggested method</a>).
         </p>
         <p>
@@ -97,7 +100,9 @@ export default function Info() {
           forested neighborhoods, until &quot;done&quot;. Until then, using this map (when
           you&apos;re bored or motivated) is a good way to help the city plant more trees.
         </p>
-        <h2 className="text-xl font-bold mt-4">Machine learning</h2>
+        <h2 id="machine-learning" className="text-xl font-bold mt-4">
+          Machine learning
+        </h2>
         <p>
           Right-clicks will store requests annotated with the precise location of the click. In the
           future, this may be used to train a future machine learning vision model (which will be

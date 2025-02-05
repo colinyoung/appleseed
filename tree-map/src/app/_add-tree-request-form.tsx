@@ -228,6 +228,9 @@ export default function AddTreeRequestForm({
           <div className="flex flex-col gap-2 mt-4 border-t border-green-700 pt-2">
             <p className="mt-2 text-sm text-gray-500 dark:text-gray-300 font-bold">Tips:</p>
             <ul className="text-sm text-gray-500 dark:text-gray-300">
+              <li>
+                We have some <a href="/info#examples">good examples of spots to plant here</a>.
+              </li>
               {!isMobile && <li>• You can right-click on a house to prefill its address.</li>}
               <li>
                 • Yes, you can request a tree on a sidewalk, but make sure the sidewalk is wide
