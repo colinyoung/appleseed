@@ -111,7 +111,6 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
       logInfo(`Created SR number: ${srNumber}`);
 
       // Store in database
-      console.log('Inserting into database', srNumber, address, numTrees, locationText, lat, lng);
       await db.query(
         `INSERT INTO tree_requests 
                  (sr_number, street_address, num_trees, location, lat, lng)
