@@ -132,11 +132,22 @@ export default function AddTreeRequestForm({
 
   const isMobile = useIsMobile();
 
+  const [hasOnboarded, setHasOnboarded] = useState(
+    typeof window !== 'undefined' && localStorage.getItem('hasOnboarded') === 'true',
+  );
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('hasOnboarded', hasOnboarded.toString());
+    }
+  }, [hasOnboarded]);
+
   return (
-    <div className="md:absolute md:right-6 md:top-6">
+    <div className="md:absolute md:right-6 md:top-6 md:bottom-18 md:max-h-[90vh]">
       <div
         className={cn(
           'flex bg-green-700 dark:bg-green-900 flex-col p-6 w-full md:w-[500px] md:border-2 md:border-green-800 md:rounded-lg md:shadow-lg',
+          'md:max-h-full md:h-full overflow-y-auto',
         )}
       >
         <div className="flex justify-between flex-row items-start">
@@ -154,8 +165,8 @@ export default function AddTreeRequestForm({
             <p className="text-md text-gray-500 dark:text-gray-300">
               {isMobile
                 ? 'Search addresses to add tree requests. '
-                : 'Point, click, and search to add tree requests. '}
-              <Link href="/info">More info</Link>
+                : 'Point, right-click, and search to add tree requests. '}
+              <Link href="/info">More...</Link>
             </p>
           </div>
           {!isMobile && (
@@ -167,6 +178,8 @@ export default function AddTreeRequestForm({
             <p>View on desktop for a much better experience and to see trees on a map.</p>
           </div>
         )}
+        {!hasOnboarded && <Onboarding setHasOnboarded={setHasOnboarded} />}
+
         <form
           className={cn('mt-6 flex flex-col gap-2', collapsed ? 'hidden' : '')}
           onSubmit={handleSubmit}
@@ -299,4 +312,65 @@ async function createTreeRequest({
     throw new Error(data.error);
   }
   return data;
+}
+
+function Onboarding({ setHasOnboarded }: { setHasOnboarded: (hasOnboarded: boolean) => void }) {
+  const [isVideoFullscreen, setIsVideoFullscreen] = useState(false);
+  const modalOpenTimeRef = useRef<number | null>(null);
+
+  const handleCloseModal = () => {
+    if (modalOpenTimeRef.current) {
+      const timeWatched = Date.now() - modalOpenTimeRef.current;
+      if (timeWatched >= 1000) {
+        // 1 second in milliseconds
+        setHasOnboarded(true);
+      }
+    }
+    setIsVideoFullscreen(false);
+  };
+
+  useEffect(() => {
+    if (isVideoFullscreen) {
+      modalOpenTimeRef.current = Date.now();
+    } else {
+      modalOpenTimeRef.current = null;
+    }
+  }, [isVideoFullscreen]);
+
+  return (
+    <div className="mt-4 bg-blue-200 border-2 border-blue-600 rounded-lg p-2">
+      <h3 className="text-lg font-bold text-black">How to use</h3>
+      <p className="text-sm text-gray-900">Click the video below for a quick tutorial.</p>
+      <div className="cursor-pointer py-2" onClick={() => setIsVideoFullscreen(true)}>
+        <video src="/assets/create.mp4" muted loop className="w-full rounded-lg" />
+      </div>
+      <div className="flex flex-row justify-end items-center gap-2">
+        <button
+          className="bg-gray-800 text-white p-2 rounded-md"
+          onClick={() => setHasOnboarded(true)}
+        >
+          Let&apos;s go!
+        </button>
+      </div>
+
+      {isVideoFullscreen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center"
+          onClick={handleCloseModal}
+        >
+          <div className="w-full h-full max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+            <video
+              src="/assets/create.mp4"
+              muted
+              loop
+              autoPlay
+              controls
+              className="max-w-full max-h-full"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
