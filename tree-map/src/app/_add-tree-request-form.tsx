@@ -11,11 +11,14 @@ import { PlaceAutocompleteClassic } from './_visgl-autocomplete';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useIsMobile } from './hooks';
+
 type TreeRequestResult = {
   srNumber: string;
   address: string;
   numTrees: number;
   location: string;
+  lat: number;
+  lng: number;
 };
 
 async function submitForm(e: React.FormEvent<HTMLFormElement>): Promise<TreeRequestResult> {
@@ -24,14 +27,20 @@ async function submitForm(e: React.FormEvent<HTMLFormElement>): Promise<TreeRequ
   const address = formElement.address.value;
   const numTrees = formElement.numTrees.value;
   const location = formElement.location.value;
-  const result = await createTreeRequest(address, numTrees, location);
+  const lat = formElement.lat.value;
+  const lng = formElement.lng.value;
+  const result = await createTreeRequest({ address, numTrees, location, lat, lng });
   return result;
 }
 
 export default function AddTreeRequestForm({
   onPlaceSelected,
+  lat,
+  lng,
 }: {
   onPlaceSelected: (place: google.maps.places.PlaceResult | null) => void;
+  lat?: number;
+  lng?: number;
 }) {
   const [numTrees, setNumTrees] = useState(1);
   const [location, setLocation] = useState('Parkway');
@@ -95,6 +104,7 @@ export default function AddTreeRequestForm({
         setMarkers((prevMarkers: Marker[]) => [...prevMarkers, newMarker]);
 
         toast.success('Tree request created! SR Number: ' + result.srNumber);
+        // Reset form
         setNumTrees(1);
         setLocation('Parkway');
       } catch (error: unknown) {
@@ -199,6 +209,8 @@ export default function AddTreeRequestForm({
               what we call the city-owned area between the sidewalk and the street in Chicago.
             </p>
           </div>
+          <input type="hidden" name="lat" value={lat === undefined ? '' : lat.toString()} />
+          <input type="hidden" name="lng" value={lng === undefined ? '' : lng.toString()} />
           <button
             type="submit"
             disabled={submitting}
@@ -252,17 +264,25 @@ export default function AddTreeRequestForm({
   );
 }
 
-async function createTreeRequest(
-  address: string,
-  numTrees: number,
-  location: string,
-): Promise<TreeRequestResult> {
+async function createTreeRequest({
+  address,
+  numTrees,
+  location,
+  lat,
+  lng,
+}: {
+  address: string;
+  numTrees: number;
+  location: string;
+  lat: number;
+  lng: number;
+}): Promise<TreeRequestResult> {
   const response = await fetch(`/api/tree-requests`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ address, numTrees, location }),
+    body: JSON.stringify({ address, numTrees, location, lat, lng }),
   });
   const data = await response.json();
   if (data.error) {

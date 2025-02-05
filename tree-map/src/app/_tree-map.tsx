@@ -140,7 +140,11 @@ export default function TreeMap() {
         </GoogleMap>
       )}
       <OverrideHTMLInputContextProvider value={overriddenInputValue}>
-        <AddTreeRequestForm onPlaceSelected={onPlaceSelectedFromAddress} />
+        <AddTreeRequestForm
+          onPlaceSelected={onPlaceSelectedFromAddress}
+          lat={currentXMark?.lat}
+          lng={currentXMark?.lng}
+        />
       </OverrideHTMLInputContextProvider>
     </>
   );
