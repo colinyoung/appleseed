@@ -5,11 +5,12 @@ import { OverrideHTMLInputContext } from './_context';
 interface Props {
   onPlaceSelect: (place: google.maps.places.PlaceResult | null) => void;
   inputClassName?: string;
+  disabled?: boolean;
 }
 
 // This is an example of the classic "Place Autocomplete" widget.
 // https://developers.google.com/maps/documentation/javascript/place-autocomplete
-export const PlaceAutocompleteClassic = ({ onPlaceSelect, inputClassName }: Props) => {
+export const PlaceAutocompleteClassic = ({ onPlaceSelect, inputClassName, disabled }: Props) => {
   const [placeAutocomplete, setPlaceAutocomplete] =
     useState<google.maps.places.Autocomplete | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +48,7 @@ export const PlaceAutocompleteClassic = ({ onPlaceSelect, inputClassName }: Prop
       <input
         ref={inputRef}
         className={inputClassName}
+        disabled={disabled}
         autoComplete="off"
         name="address"
         onKeyDown={(e) => {
