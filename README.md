@@ -1,12 +1,11 @@
 # Appleseed Project
 
-This project provides an API, Playwright script, and testing suite for submitting tree planting requests to the City of Chicago.
+This project provides a Playwright script, web interface, API spec, and testing suite for submitting tree planting requests to the City of Chicago.
 
 ## Project Structure
 
 - `tests/` - Directory containing test files
 - `playwright.config.ts` - Playwright configuration file
-- `srNumbers.csv` - Data file containing old Service Request (SR) numbers which can be imported
 - `openapi.yaml` - OpenAPI specification for the API
 
 ## Getting Started
@@ -54,6 +53,18 @@ POST /tree-requests;
 
 For detailed API documentation, refer to the OpenAPI specification in `docs/openapi.yaml`.
 
+## Running the Web Interface
+
+To run the web interface, use:
+
+```bash
+# run api
+pnpm start
+# run web
+cd tree-map
+pnpm dev
+```
+
 ## Creating a Custom GPT
 
 You can create a custom GPT using this project's OpenAPI specification to interact with the tree planting service. Here's how:
@@ -88,3 +99,7 @@ It should not talk to the user about physical trees, how to plant them, or other
 ### Playwright Configuration
 
 The project uses `playwright.config.ts` for test configuration. See the [Playwright documentation](https://playwright.dev/docs/test-configuration) for more details on configuration options.
+
+## Whoami
+
+I'm Colin Young, a software engineer living in Chicago. I'm the sole developer of this project. Feel free to contact me on Bluesky at [@colinyoung.com](https://bsky.app/profile/colinyoung.com).
