@@ -13,14 +13,15 @@ export default function Info() {
           This is an interactive map of Chicago where you can request trees anonymously via 311. You
           can right-click on good tree locations to{' '}
           <a href="https://en.wikipedia.org/wiki/Reverse_geocoding">reverse-geocode</a> an address
-          and request a tree/trees. You can only request one tree at a time, though batch-requesting
-          is coming soon. (It doesn&apos;t hurt that this rate-limits things for now).
+          and request a tree/trees. You can make one request at a time, though batch-requesting is
+          coming soon. (It doesn&apos;t hurt that this rate-limits things for now).
         </p>
         <h2 className="text-xl font-bold mt-4">Planting a tree</h2>
         <p>
           Right-click where the tree should go (
           <a href="#machine-learning">the more precisely, the better</a>). Two pins will be dropped:
-          One marking the spot, and another marking the property.
+          One marking the spot, and another marking the property. (Sometimes they don&apos;t quite
+          match - in that case, just click on the building.)
         </p>
         <h2 id="examples" className="text-xl font-bold mt-4">
           Examples
@@ -146,8 +147,10 @@ export default function Info() {
           <a href="https://playwright.dev">Playwright</a>.
         </p>
         <p>
-          For API access, please write to <a href="mailto:me@colinyoung.com">me@colinyoung.com</a>{' '}
-          or contact me on <a href="https://bsky.app/profile/colinyoung.com">Bluesky</a>.
+          Please do not abuse this system. You can write to me at{' '}
+          <a href="mailto:me@colinyoung.com">me@colinyoung.com</a> or contact me on{' '}
+          <a href="https://bsky.app/profile/colinyoung.com">Bluesky</a>. Source code is available{' '}
+          <a href="https://github.com/colinyoung/appleseed">here</a>.
         </p>
       </div>
     </div>
