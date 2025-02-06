@@ -216,6 +216,7 @@ export default function AddTreeRequestForm({
               <PlaceAutocompleteClassic
                 inputClassName="w-full p-2 rounded-md text-black"
                 onPlaceSelect={onPlaceSelected}
+                disabled={submitting}
               />
             )}
             <p className="text-sm text-gray-300">
@@ -233,6 +234,7 @@ export default function AddTreeRequestForm({
               value={numTrees}
               onChange={(e) => setNumTrees(parseInt(e.target.value))}
               className="w-full p-2 rounded-md text-black"
+              disabled={submitting}
             />
             <p className="text-sm text-gray-300">
               Only request more than one tree if you have a specific reason (i.e. building is on a
@@ -250,6 +252,7 @@ export default function AddTreeRequestForm({
               value={location}
               className="w-full p-2 rounded-md text-black"
               onChange={(e) => setLocation(e.target.value)}
+              disabled={submitting}
             />
             <p className="text-sm text-gray-300">
               This is almost always best left as the default, &quot;Parkway&quot;, since that&apos;s
