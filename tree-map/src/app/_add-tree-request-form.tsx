@@ -1,7 +1,7 @@
 'use client';
 
 import cn from 'clsx';
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { TreeMapContext } from './_context';
@@ -11,7 +11,6 @@ import { PlaceAutocompleteClassic } from './_visgl-autocomplete';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useIsMobile } from './hooks';
-import { PlantTreeStage } from './info/_types';
 
 type TreeRequestResult = {
   srNumber: string;
@@ -31,12 +30,7 @@ async function submitForm(e: React.FormEvent<HTMLFormElement>): Promise<TreeRequ
   const location = formElement.location.value;
   const lat = formElement.lat.value;
   const lng = formElement.lng.value;
-  const result = await createTreeRequest(
-    { address, numTrees, location, lat, lng },
-    function onChunk(chunk: PlantTreeStage) {
-      console.log(chunk);
-    },
-  );
+  const result = await createTreeRequest({ address, numTrees, location, lat, lng });
   return result;
 }
 
@@ -71,7 +65,22 @@ export default function AddTreeRequestForm({
   }, [googleLoaded]);
 
   const [progress, setProgress] = useState(0);
+  const messages = useMemo(
+    () => [
+      'Starting...',
+      'Starting...',
+      'Verifying address...',
+      'Verifying address...',
+      'Verifying address...',
+      'Submitting...',
+      'Submitting...',
+      'Submitting...',
+    ],
+    [],
+  );
+  const [statusMessage, setStatusMessage] = useState('');
   useEffect(() => {
+    let index = 0;
     if (submitting) {
       const interval = setInterval(() => {
         setProgress((prev) => {
@@ -81,14 +90,18 @@ export default function AddTreeRequestForm({
           }
           return Math.min(prev + 10, 95);
         });
+        setStatusMessage(messages[index] ?? 'Finalizing...');
+        index++;
       }, 1250);
 
       return () => clearInterval(interval);
     }
     if (!submitting) {
+      setStatusMessage('');
+      index = 0;
       setProgress(0);
     }
-  }, [submitting]);
+  }, [submitting, messages]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -203,7 +216,6 @@ export default function AddTreeRequestForm({
               <PlaceAutocompleteClassic
                 inputClassName="w-full p-2 rounded-md text-black"
                 onPlaceSelect={onPlaceSelected}
-                disabled={submitting}
               />
             )}
             <p className="text-sm text-gray-300">
@@ -221,7 +233,6 @@ export default function AddTreeRequestForm({
               value={numTrees}
               onChange={(e) => setNumTrees(parseInt(e.target.value))}
               className="w-full p-2 rounded-md text-black"
-              disabled={submitting}
             />
             <p className="text-sm text-gray-300">
               Only request more than one tree if you have a specific reason (i.e. building is on a
@@ -239,7 +250,6 @@ export default function AddTreeRequestForm({
               value={location}
               className="w-full p-2 rounded-md text-black"
               onChange={(e) => setLocation(e.target.value)}
-              disabled={submitting}
             />
             <p className="text-sm text-gray-300">
               This is almost always best left as the default, &quot;Parkway&quot;, since that&apos;s
@@ -248,27 +258,32 @@ export default function AddTreeRequestForm({
           </div>
           <input type="hidden" name="lat" value={lat === undefined ? '' : lat.toString()} />
           <input type="hidden" name="lng" value={lng === undefined ? '' : lng.toString()} />
-          <button
-            type="submit"
-            disabled={submitting}
-            className={cn(
-              'rounded-lg border border-[#00000099] text-white mt-2 p-2 px-4 bg-gradient-to-b from-green-700 to-green-800 rounded-md w-fit',
-              'disabled:opacity-50 disabled:cursor-not-allowed',
-            )}
-          >
-            {submitting ? (
-              <div className="h-6 items-center flex w-[100px]">
-                <div className="w-full rounded-full h-2.5 bg-green-800">
-                  <div
-                    className="bg-green-600 h-2.5 rounded-full transition-all duration-500 ease-out"
-                    style={{ width: `${progress}%` }}
-                  />
+          <div className="flex flex-row items-center gap-2 mt-2">
+            <button
+              type="submit"
+              disabled={submitting}
+              className={cn(
+                'rounded-lg border border-[#00000099] text-white p-2 px-4 bg-gradient-to-b from-green-700 to-green-800 rounded-md w-fit',
+                'disabled:opacity-50 disabled:cursor-not-allowed',
+              )}
+            >
+              {submitting ? (
+                <div className="h-6 items-center flex w-[100px]">
+                  <div className="w-full rounded-full h-2.5 bg-green-800">
+                    <div
+                      className="bg-green-600 h-2.5 rounded-full transition-all duration-500 ease-out"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ) : (
-              'Create Tree Request'
+              ) : (
+                'Create Tree Request'
+              )}
+            </button>
+            {statusMessage && (
+              <span className="text-sm text-white/80 top-2 block">{statusMessage}</span>
             )}
-          </button>
+          </div>
           {submitting && (
             <p className="flex text-sm text-white w-full">
               Requesting from 311...This could take ~10 seconds.
@@ -305,22 +320,19 @@ export default function AddTreeRequestForm({
   );
 }
 
-async function createTreeRequest(
-  {
-    address,
-    numTrees,
-    location,
-    lat,
-    lng,
-  }: {
-    address: string;
-    numTrees: number;
-    location: string;
-    lat: number;
-    lng: number;
-  },
-  onChunk: (chunk: PlantTreeStage) => void,
-): Promise<TreeRequestResult> {
+async function createTreeRequest({
+  address,
+  numTrees,
+  location,
+  lat,
+  lng,
+}: {
+  address: string;
+  numTrees: number;
+  location: string;
+  lat: number;
+  lng: number;
+}): Promise<TreeRequestResult> {
   const response = await fetch(`/api/tree-requests`, {
     method: 'POST',
     headers: {
@@ -328,28 +340,11 @@ async function createTreeRequest(
     },
     body: JSON.stringify({ address, numTrees, location, lat, lng }),
   });
-  if (!response.body) throw new Error('Response body is null');
-  const reader = response.body.getReader();
-  while (true) {
-    try {
-      const { done, value } = await reader.read();
-      const text = new TextDecoder().decode(value);
-      const data = JSON.parse(text) as PlantTreeStage;
-      if (done) {
-        return {
-          srNumber: data.srNumber!,
-          address,
-          numTrees,
-          location,
-          lat,
-          lng,
-        };
-      }
-      onChunk(data);
-    } catch (error) {
-      console.error('Error parsing chunk', error);
-    }
+  const data = await response.json();
+  if (data.error) {
+    throw new Error(data.error);
   }
+  return data;
 }
 
 function Onboarding({ setHasOnboarded }: { setHasOnboarded: (hasOnboarded: boolean) => void }) {
