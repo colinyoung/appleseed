@@ -104,9 +104,6 @@ export default function TreeMap() {
             </AdvancedMarker>,
           );
         }
-        if (marker.address.includes('Iowa')) {
-          debugger;
-        }
         // Add white "tree spot" markers
         if (
           typeof marker.lat !== 'undefined' &&
