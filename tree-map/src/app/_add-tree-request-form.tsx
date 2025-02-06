@@ -109,6 +109,8 @@ export default function AddTreeRequestForm({
           location: result.location,
           longitude: geocodedLocation.longitude,
           latitude: geocodedLocation.latitude,
+          lat: lat,
+          lng: lng,
         };
 
         setMarkers((prevMarkers: Marker[]) => [...prevMarkers, newMarker]);
@@ -125,7 +127,7 @@ export default function AddTreeRequestForm({
         setSubmitting(false);
       }
     },
-    [setMarkers],
+    [setMarkers, lat, lng],
   );
 
   const [collapsed, setCollapsed] = useState(false);

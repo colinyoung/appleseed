@@ -104,10 +104,19 @@ export default function TreeMap() {
             </AdvancedMarker>,
           );
         }
-        if (typeof marker.lat === 'number' && typeof marker.lng === 'number') {
+        if (marker.address.includes('Iowa')) {
+          debugger;
+        }
+        // Add white "tree spot" markers
+        if (
+          typeof marker.lat !== 'undefined' &&
+          Number.isFinite(marker.lat) &&
+          typeof marker.lng !== 'undefined' &&
+          Number.isFinite(marker.lng)
+        ) {
           acc.push(
             <AdvancedMarker key={index + '-point'} position={{ lat: marker.lat, lng: marker.lng }}>
-              <Pin background="#ffffff0a" borderColor="white" glyph="🌳" scale={1} />
+              <Pin background="white" borderColor="white" glyph="🌳" scale={1} />
             </AdvancedMarker>,
           );
         }
