@@ -25,6 +25,7 @@ const DEFAULT_TIMEOUT = 5000;
 
 export async function plantTree(chromium: BrowserType<{}>, db: DB, request: PlantTreeRequest) {
   validateRequest(request);
+
   const { address, numTrees = 1, location, lat, lng } = request;
   const browser = await chromium.launch();
   const context = await browser.newContext({
@@ -60,7 +61,7 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
       .getByPlaceholder('Please enter an address')
       .fill(address, { timeout: DEFAULT_TIMEOUT });
     await delay();
-    logInfo('Filled address');
+    logInfo(`Filled address ${address}`);
 
     try {
       await page
@@ -113,8 +114,8 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
       // Store in database
       await db.query(
         `INSERT INTO tree_requests 
-                 (sr_number, street_address, num_trees, location, lat, lng)
-                 VALUES ($1, $2, $3, $4, $5, $6)`,
+                   (sr_number, street_address, num_trees, location, lat, lng)
+                   VALUES ($1, $2, $3, $4, $5, $6)`,
         [srNumber, address, numTrees, locationText, lat ?? null, lng ?? null],
       );
 
@@ -140,16 +141,26 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
 
 function validateRequest(request: PlantTreeRequest) {
   if (!request.address) {
-    throw new Error('Address is required');
+    const error = Error('Address is required. You sent: ' + request.address);
+    error.name = 'InvalidAddressError';
+    throw error;
   }
   if (request.numTrees && (request.numTrees < 1 || request.numTrees > 10)) {
-    throw new Error('Number of trees must be between 1 and 10');
+    const error = Error('Number of trees must be between 1 and 10. You sent: ' + request.numTrees);
+    error.name = 'InvalidNumberOfTreesError';
+    throw error;
   }
   if (request.location && request.location.length > 50) {
-    throw new Error('Location must be less than 50 characters');
+    const error = Error('Location must be less than 50 characters. You sent: ' + request.location);
+    error.name = 'InvalidLocationError';
+    throw error;
   }
   if (request.address.match(/[^a-zA-Z0-9\s]/)) {
-    throw new Error('Address must contain only letters, numbers, and spaces');
+    const error = Error(
+      'Address must contain only letters, numbers, and spaces. You sent: ' + request.address,
+    );
+    error.name = 'InvalidAddressError';
+    throw error;
   }
 
   if (
@@ -157,9 +168,11 @@ function validateRequest(request: PlantTreeRequest) {
       /([0-9]{1,5}) (([NESW]) ([\w ]+) (ave|st|blvd|rd|dr|ln|pl|ct|pkwy|expwy|hwy|cir|ter|way|sq|aly|byp|trl|row|mnr|cres|brg|grn|pth|cv|hvn|fld|isle|rte)|n broadway)/i,
     )
   ) {
-    throw new Error(
+    const error = Error(
       'Address must be in the format of "12345 N/S/E/W StreetName Ave/St/etc", e.g. "1 S State St". You sent: ' +
         request.address,
     );
+    error.name = 'InvalidAddressError';
+    throw error;
   }
 }

@@ -5,6 +5,9 @@ export const logDebug = (message: string, ...args: any[]) => {
 };
 
 export const logInfo = (message: string, ...args: any[]) => {
+  if (!process.env.NODE_ENV || process.env.NODE_ENV === 'test') {
+    return;
+  }
   console.log(`[INFO] ${message}`, ...args);
 };
 

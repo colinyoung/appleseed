@@ -151,4 +151,6 @@ export async function migrate(db: DB) {
   logDebug('Importing existing data...');
   await importExistingData(db);
   logDebug('Data import completed');
+
+  return migrations.length;
 }

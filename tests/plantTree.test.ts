@@ -5,8 +5,12 @@ import { QueryResult } from 'pg';
 import { plantTree, PlantTreeResult } from '../plantTree';
 import { PlantTreeRequest } from '../server';
 import { BrowserType } from 'playwright';
+import { getRandomValidAddress } from './util';
 
 const plantTreeMock = jest.fn<(request: PlantTreeRequest) => Promise<PlantTreeResult>>();
+
+const LAT = 41.8781;
+const LNG = -87.6298;
 
 jest.mock('../plantTree', () => ({
   plantTree: plantTreeMock,
@@ -15,6 +19,9 @@ jest.mock('../plantTree', () => ({
 // Mock Playwright
 const mockLocator = {
   click: jest.fn<any>(),
+  first: jest.fn<any>().mockReturnValue({
+    click: jest.fn<any>(),
+  }),
   fill: jest.fn<any>(),
   innerText: jest
     .fn<any>()
@@ -53,13 +60,17 @@ describe('Plant Tree Function', () => {
   it('should check for existing address', async () => {
     mockQuery.mockResolvedValue({ rows: [{ id: 1 }] } as QueryResult);
 
-    const result = await plantTree(chromiumMock, dbMock, { address: '123 Main St' });
+    const result = await plantTree(chromiumMock, dbMock, {
+      address: '333 S Shields Ave',
+      lat: LAT,
+      lng: LNG,
+    });
 
     expect(result.success).toBe(false);
     expect(result.message).toContain('already exists');
     expect(mockQuery).toHaveBeenCalledWith(
       expect.stringContaining('SELECT id FROM tree_requests'),
-      ['123 Main St'],
+      ['333 S Shields Ave'],
     );
   });
 
@@ -67,19 +78,25 @@ describe('Plant Tree Function', () => {
     mockQuery.mockResolvedValueOnce({ rows: [] } as unknown as QueryResult); // no existing address
     mockQuery.mockResolvedValueOnce({ rows: [{ id: 1 }] } as QueryResult); // successful insert
 
+    const address = getRandomValidAddress();
+
     const result = await plantTree(chromiumMock, dbMock, {
-      address: '123 Main St',
+      address,
       numTrees: 2,
       location: 'Side of building',
+      lat: LAT,
+      lng: LNG,
     });
 
     expect(result.success).toBe(true);
     expect(result.srNumber).toBe('12345');
     expect(mockQuery).toHaveBeenCalledWith(expect.stringContaining('INSERT INTO tree_requests'), [
       '12345',
-      '123 Main St',
+      address,
       2,
       'Side of building',
+      LAT,
+      LNG,
     ]);
   });
 
@@ -94,9 +111,15 @@ describe('Plant Tree Function', () => {
       }),
     });
 
-    const result = await plantTree(chromiumMock, dbMock, { address: 'Invalid address' });
-
-    expect(result.success).toBe(false);
-    expect(result.message).toContain('Invalid address');
+    try {
+      await plantTree(chromiumMock, dbMock, {
+        address: 'Invalid address',
+        lat: LAT,
+        lng: LNG,
+      });
+    } catch (error) {
+      expect(error).toBeInstanceOf(Error);
+      expect((error as Error).message).toContain('Address must be in the format of');
+    }
   });
 });

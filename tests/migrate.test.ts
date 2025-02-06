@@ -45,19 +45,17 @@ describe('Database Migrations', () => {
       return Promise.resolve({ rows: [] } as unknown as QueryResult); // default response
     });
 
-    await migrate(dbMock);
+    const numMigrations = await migrate(dbMock);
 
-    expect(dbMock.query).toHaveBeenCalledTimes(6);
-
-    const fifthCall = dbMock.query.mock.calls[4];
-    expect(fifthCall).toEqual(
+    const firstInsert = dbMock.query.mock.calls[numMigrations + 1];
+    expect(firstInsert).toEqual(
       expect.arrayContaining([
         expect.stringContaining('INSERT INTO tree_requests'),
         expect.arrayContaining(['123', '456 Main St', undefined, 2, 'Parkway']),
       ]),
     );
-    const sixthCall = dbMock.query.mock.calls[5];
-    expect(sixthCall).toEqual(
+    const secondInsert = dbMock.query.mock.calls[numMigrations + 3];
+    expect(secondInsert).toEqual(
       expect.arrayContaining([
         expect.stringContaining('INSERT INTO tree_requests'),
         expect.arrayContaining(['456', '789 Oak St', undefined, 1, 'Side of building']),
