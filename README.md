@@ -4,8 +4,10 @@ This project provides a Playwright script, web interface, API spec, and testing 
 
 ## Project Structure
 
+- `tree-map/` - Web interface
 - `tests/` - Directory containing test files
 - `playwright.config.ts` - Playwright configuration file
+- `server.ts` - API server
 - `openapi.yaml` - OpenAPI specification for the API
 
 ## Getting Started
@@ -34,6 +36,20 @@ To run the tests, use:
 pnpm test
 ```
 
+## Running the Web Interface
+
+To run the web interface, use:
+
+```bash
+# run api
+pnpm start
+# run web
+cd tree-map
+pnpm dev
+```
+
+The app should not be running at http://localhost:3000.
+
 ## API Usage
 
 The API provides endpoints for managing tree planting data and service requests. Here are some key endpoints:
@@ -47,23 +63,13 @@ POST /tree-requests;
 {
   "address": "1234 W Main St",
   "numTrees": 1,
-  "location": "Parkway"
+  "location": "Parkway",
+  "lat": 41.8781, // used for tracking click locations
+  "lng": -87.6298
 }
 ```
 
 For detailed API documentation, refer to the OpenAPI specification in `docs/openapi.yaml`.
-
-## Running the Web Interface
-
-To run the web interface, use:
-
-```bash
-# run api
-pnpm start
-# run web
-cd tree-map
-pnpm dev
-```
 
 ## Creating a Custom GPT
 
