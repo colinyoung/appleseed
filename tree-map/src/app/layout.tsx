@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import { Toaster } from 'sonner';
 import './globals.css';
+import Script from 'next/script';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -31,6 +32,19 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png" />
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="shortcut icon" href="/favicon.ico" />
+        {/* Google tag (gtag.js) */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-7D3T8VDD0Y" />
+        <Script id="google-analytics">
+          {`
+            if (window.location.hostname === 'planttreesinchicago.com') {
+              console.log('Starting GA');
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-7D3T8VDD0Y');
+            }
+          `}
+        </Script>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Toaster position="top-left" richColors />
