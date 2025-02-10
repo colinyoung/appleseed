@@ -185,9 +185,9 @@ export default function AddTreeRequestForm({
             <p className="text-md text-gray-300">
               {isMobile
                 ? 'Search addresses to add tree requests. '
-                : 'Point, right-click, and search to add tree requests. '}
+                : 'To add, zoom and right-click (or search). '}
               <Link className="text-white" href="/info">
-                More...
+                About...
               </Link>
             </p>
           </div>

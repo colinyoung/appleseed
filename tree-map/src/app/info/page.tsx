@@ -54,7 +54,7 @@ export default function Info() {
               height={440}
             />
             <figcaption className="text-sm text-gray-500 text-bold text-center p-2 inline-block">
-              Bad locations are driveways, bus stops, or areas with existing trees.
+              Bad locations are driveways, bus stops, or sidewalks that are too narrow.
             </figcaption>
           </figure>
         </details>
@@ -79,8 +79,7 @@ export default function Info() {
         <h2 className="text-xl font-bold mt-4">The process</h2>
         <p>
           Requesting a tree anonymously gives property owners of <em>homes</em> the right to refuse
-          a tree, as the city leaves a door hanger with two options: Choose your tree species, or
-          call a phone number to decline the tree.
+          a tree, as the city leaves a door hanger alerting them and allowing them to decline.
         </p>
         <p>
           My general observation (from following up and checking tree request numbers, Street View,
@@ -94,12 +93,14 @@ export default function Info() {
         </p>
         <h2 className="text-xl font-bold mt-4">Why</h2>
         <p>
-          The City of Chicago requires new trees for new developments and, infrequently, plant trees
-          of their own volition in less forested communities. Other than that, they rely on home-
-          and business owners opting-in and requesting a tree. My position is different. I think the
-          city should have an opt-out program and plant trees on a grid system, prioritizing less
-          forested neighborhoods, until &quot;done&quot;. Until then, using this map (when
-          you&apos;re bored or motivated) is a good way to help the city plant more trees.
+          The City of Chicago requires new trees for new developments (but trees often don&apos;t
+          get planted anyway) and, infrequently, plants trees of their own volition in less forested
+          communities. Other than that, they rely on home- and business owners opting-in and
+          requesting a tree. My position is different. I think the city should have an opt-out
+          program and plant trees on a grid system, prioritizing less forested neighborhoods, until
+          &quot;done&quot;. Until then, using this map (when you&apos;re bored or motivated) is a
+          good way to help the city plant more trees. At the very least, it builds a database of
+          viable tree locations.
         </p>
         <h2 id="machine-learning" className="text-xl font-bold mt-4">
           Machine learning
@@ -117,15 +118,6 @@ export default function Info() {
           <strong>A:</strong> As stated before, they&apos;re given the option to decline.
         </p>
         <p>
-          <strong>Q:</strong> What can I say to homeowners to change their mind?
-          <br />
-          <strong>A:</strong> The city offers{' '}
-          <a href="https://www.chicago.gov/city/en/sites/our-roots-chicago/home/media-tools.html">
-            flyers about this
-          </a>
-          .
-        </p>
-        <p>
           <strong>Q:</strong> Can I plant trees myself?
           <br />
           <strong>A:</strong> No, and besides, the city plants older, larger trees.
@@ -133,11 +125,28 @@ export default function Info() {
         <p>
           <strong>Q:</strong> How does the city feel about this site?
           <br />
-          <strong>A:</strong> Nobody&apos;s told me to stop (I even told an alderperson about it),
-          and the city&apos;s{' '}
+          <strong>A:</strong> The city&apos;s{' '}
           <a href="https://www.chicago.gov/city/en/general/privacy.html">privacy policy</a>{' '}
-          doesn&apos;t prevent it. Worst case, this is a great way to crowdsource the process of
-          identifying where trees are missing.
+          doesn&apos;t prohibit this, and nobody&apos;s told me to stop (I even told an alderperson
+          about it). Worst case, this is a great way to crowdsource the process of identifying where
+          trees are missing.
+        </p>
+        <p>
+          <strong>Q:</strong> What about tree roots damaging pipes or other concerns?
+          <br />
+          <strong>A:</strong> The city has a{' '}
+          <a href="https://www.chicago.gov/city/en/sites/our-roots-chicago/home/media-tools.html">
+            media kit
+          </a>{' '}
+          about this that answers this and other questions.
+        </p>
+        <p>
+          <strong>Q:</strong> I don&apos;t want a tree. Can I make your site not let people request
+          trees in my parkway?
+          <br />
+          <strong>A:</strong> Sure, just email me at{' '}
+          <a href="mailto:me@colinyoung.com">me@colinyoung.com</a> and I&apos;ll add an exception
+          for you.
         </p>
         <h2 className="text-xl font-bold mt-4">About this site</h2>
         <p>
