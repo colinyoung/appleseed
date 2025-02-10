@@ -202,7 +202,7 @@ export default function AddTreeRequestForm({
             <p>View on desktop for a much better experience and to see trees on a map.</p>
           </div>
         )}
-        {!hasOnboarded && <Onboarding setHasOnboarded={setHasOnboarded} />}
+        {!hasOnboarded && !isMobile && <Onboarding setHasOnboarded={setHasOnboarded} />}
 
         <form
           className={cn('mt-6 flex flex-col gap-2', collapsed ? 'hidden' : '')}
