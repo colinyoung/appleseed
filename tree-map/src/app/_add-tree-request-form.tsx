@@ -11,6 +11,7 @@ import { PlaceAutocompleteClassic } from './_visgl-autocomplete';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useIsMobile } from './hooks';
+import { trackEvent } from './api/tree-requests/_utils';
 
 type TreeRequestResult = {
   srNumber: string;
@@ -106,15 +107,18 @@ export default function AddTreeRequestForm({
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       setSubmitting(true);
+      trackEvent('add_tree_request_started');
       try {
         const result = await submitForm(e);
         setSubmitting(false);
 
         if (result.alreadyExists) {
+          trackEvent('add_tree_request_already_exists');
           toast.warning('Tree request already exists. Please try again.');
           return;
         }
         if (!result.srNumber) {
+          trackEvent('add_tree_request_failed');
           toast.error('Failed to create tree request. Please try again.');
           return;
         }
@@ -134,11 +138,17 @@ export default function AddTreeRequestForm({
 
         setMarkers((prevMarkers: Marker[]) => [...prevMarkers, newMarker]);
 
+        trackEvent('add_tree_request_success', {
+          srNumber: result.srNumber,
+        });
         toast.success('Tree request created! SR Number: ' + result.srNumber);
         // Reset form
         setNumTrees(1);
         setLocation('Parkway');
       } catch (error: unknown) {
+        trackEvent('add_tree_request_failed', {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
         toast.error(
           `Failed to create tree request. ${error instanceof Error ? error.message : 'Unknown error'}`,
         );
@@ -158,6 +168,9 @@ export default function AddTreeRequestForm({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const onboardedStatus = localStorage.getItem('hasOnboarded') === 'true';
+      if (!onboardedStatus) {
+        trackEvent('onboarding_viewed');
+      }
       setHasOnboarded(onboardedStatus);
     }
   }, []);

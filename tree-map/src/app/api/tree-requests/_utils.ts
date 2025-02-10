@@ -1,3 +1,9 @@
+declare global {
+  interface Window {
+    gtag: (event: 'event', eventName: string, properties: Record<string, unknown>) => void;
+  }
+}
+
 export function prepareAddress(address: string): string {
   if (
     !address.endsWith('Chicago, IL') &&
@@ -65,3 +71,13 @@ export function streetTypeToAbbreviation(streetType: string): string {
   }
   return streetType.slice(0, 2);
 }
+
+export const trackEvent = (eventName: string, properties?: Record<string, unknown>) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(eventName, properties);
+  } else {
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('event', eventName, properties ?? {});
+    }
+  }
+};
