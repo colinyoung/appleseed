@@ -1,9 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
-
+import Head from 'next/head';
 export default function Info() {
   return (
     <div className="flex flex-col gap-2 p-8 md:p-20 justify-center items-center">
+      <Head>
+        <title>Info</title>
+      </Head>
       <div className="flex flex-col gap-2 md:max-w-[50em] leading-6">
         <Link className="text-sm text-gray-500 no-underline" href="/">
           Back
