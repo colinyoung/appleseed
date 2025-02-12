@@ -113,11 +113,13 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
       logInfo(`Created SR number: ${srNumber}`);
 
       // Store in database
+      const latProp = safeLatLng(lat);
+      const lngProp = safeLatLng(lng);
       await db.query(
         `INSERT INTO tree_requests 
                    (sr_number, street_address, num_trees, location, lat, lng)
                    VALUES ($1, $2, $3, $4, $5, $6)`,
-        [srNumber, address, numTrees, locationText, lat ?? null, lng ?? null],
+        [srNumber, address, numTrees, locationText, latProp, lngProp],
       );
 
       await browser.close();
@@ -177,4 +179,14 @@ function validateRequest(request: PlantTreeRequest) {
     error.name = 'InvalidAddressError';
     throw error;
   }
+}
+
+function safeLatLng(latLng: unknown | undefined) {
+  if (latLng === undefined) {
+    return null;
+  }
+  if (latLng === 0 || latLng === '') {
+    return null;
+  }
+  return latLng;
 }

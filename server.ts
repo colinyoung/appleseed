@@ -4,6 +4,7 @@ import db, { DB } from './db';
 import { plantTree } from './plantTree';
 import { chromium, BrowserType } from 'playwright';
 import { PoolClient, QueryResult } from 'pg';
+import { logError } from './logger';
 
 export interface PlantTreeRequest {
   address: string;
@@ -56,7 +57,7 @@ export function createApp(deps?: Dependencies) {
       });
       res.json(result);
     } catch (error) {
-      expect(error).toBeInstanceOf(Error);
+      logError('Error planting tree', error);
       const status = (error as Error).name === 'InvalidAddressError' ? 400 : 500;
       res.status(status).json({
         error: (error as Error).message,
