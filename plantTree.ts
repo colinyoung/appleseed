@@ -102,6 +102,7 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
     logInfo('Clicked next');
     await page.getByRole('button', { name: 'Finish' }).click({ timeout: DEFAULT_TIMEOUT });
     logInfo('Clicked finish');
+
     const text = await page.getByText(
       'Your service request has been submitted, and your number is',
     );
@@ -133,6 +134,7 @@ export async function plantTree(chromium: BrowserType<{}>, db: DB, request: Plan
       message: 'Failed to get service request number',
     };
   } catch (error) {
+    logError('Error planting tree', error);
     throw error;
   } finally {
     await browser.close();
