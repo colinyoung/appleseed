@@ -31,8 +31,18 @@ async function submitForm(e: React.FormEvent<HTMLFormElement>): Promise<TreeRequ
   const location = formElement.location.value;
   const lat = formElement.lat.value;
   const lng = formElement.lng.value;
+  localStorage.setItem('hasOnboarded', 'true');
   const result = await createTreeRequest({ address, numTrees, location, lat, lng });
+  if (typeof window !== 'undefined') {
+    const treeCount = parseInt(localStorage.getItem('treeCount') || '0');
+    localStorage.setItem('treeCount', (treeCount + 1).toString());
+  }
   return result;
+}
+
+function getInitialTreeCount() {
+  if (typeof window === 'undefined') return 0;
+  return parseInt(localStorage.getItem('treeCount') || '0');
 }
 
 export default function AddTreeRequestForm({
@@ -45,6 +55,7 @@ export default function AddTreeRequestForm({
   lng?: number;
 }) {
   const [numTrees, setNumTrees] = useState(1);
+  const [treeCount, setTreeCount] = useState(getInitialTreeCount());
   const [location, setLocation] = useState('Parkway');
   const [submitting, setSubmitting] = useState(false);
   const { setMarkers } = useContext(TreeMapContext);
@@ -109,6 +120,7 @@ export default function AddTreeRequestForm({
       setSubmitting(true);
       trackEvent('add_tree_request_started');
       try {
+        setHasOnboarded(true);
         const result = await submitForm(e);
         setSubmitting(false);
 
@@ -121,6 +133,11 @@ export default function AddTreeRequestForm({
           trackEvent('add_tree_request_failed');
           toast.error('Failed to create tree request. Please try again.');
           return;
+        }
+
+        setTreeCount((prev) => prev + 1);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('treeCount', (treeCount + 1).toString());
         }
 
         const geocodedLocation = await geocodeAddress(result.address);
@@ -149,14 +166,12 @@ export default function AddTreeRequestForm({
         trackEvent('add_tree_request_failed', {
           error: error instanceof Error ? error.message : 'Unknown error',
         });
-        toast.error(
-          `Failed to create tree request. ${error instanceof Error ? error.message : 'Unknown error'}`,
-        );
+        toast.error(`Failed to create tree request! The address was likely invalid.`);
       } finally {
         setSubmitting(false);
       }
     },
-    [setMarkers, lat, lng],
+    [setMarkers, lat, lng, treeCount],
   );
 
   const [collapsed, setCollapsed] = useState(false);
@@ -304,6 +319,13 @@ export default function AddTreeRequestForm({
             <p className="flex text-sm text-white w-full">
               Requesting from 311...This could take ~10 seconds.
             </p>
+          )}
+          {treeCount > 0 && !submitting && (
+            <div className="flex flex-row items-center gap-2 rounded-lg bg-green-800 p-2 mt-3">
+              <span className="text-sm text-white/80 top-2 block font-bold">
+                🌳 You&apos;ve added {treeCount} tree{treeCount === 1 ? '' : 's'}! Keep going!
+              </span>
+            </div>
           )}
           <div className="flex flex-col gap-2 mt-4 border-t border-green-700 pt-2">
             <p className="mt-2 text-sm text-gray-300 font-bold">Tips:</p>
