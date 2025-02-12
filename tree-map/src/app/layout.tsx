@@ -17,6 +17,27 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Chicago Tree Request Map',
   description: 'Easily request trees in Chicago.',
+  metadataBase: new URL('https://planttreesinchicago.com'),
+  openGraph: {
+    title: 'Chicago Tree Request Map',
+    description: 'Easily request trees in Chicago.',
+    url: 'https://planttreesinchicago.com',
+    siteName: 'Chicago Tree Request Map',
+    type: 'website',
+    images: [
+      {
+        url: 'https://opengraph.b-cdn.net/production/images/7ec9f265-d424-4885-b587-8b7bacd45e38.png?token=v7-7xn4hfjNAtyjZbVKbI52XGvtoc9l6ShRsbH57EAw&height=794&width=1200&expires=33275323599',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Chicago Tree Request Map',
+    description: 'Easily request trees in Chicago.',
+    images: [
+      'https://opengraph.b-cdn.net/production/images/7ec9f265-d424-4885-b587-8b7bacd45e38.png?token=v7-7xn4hfjNAtyjZbVKbI52XGvtoc9l6ShRsbH57EAw&height=794&width=1200&expires=33275323599',
+    ],
+  },
 };
 
 export default function RootLayout({
