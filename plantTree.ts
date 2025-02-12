@@ -21,7 +21,7 @@ const delay = () => {
 const maxDelay = 500;
 const minDelay = 50;
 
-const DEFAULT_TIMEOUT = 5000;
+const DEFAULT_TIMEOUT = 10000;
 
 export async function plantTree(chromium: BrowserType<{}>, db: DB, request: PlantTreeRequest) {
   validateRequest(request);
