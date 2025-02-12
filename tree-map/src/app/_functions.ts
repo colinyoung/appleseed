@@ -15,7 +15,7 @@ export async function getTreeRequests(): Promise<TreeRequest[]> {
   try {
     const client = await pool.connect();
     const result = await client.query(
-      'SELECT id, sr_number, street_address, location, latitude, longitude, num_trees, status, confirmed_planted, geocode_attempted, lat, lng FROM tree_requests',
+      'SELECT id, sr_number, street_address, location, latitude, longitude, num_trees, status, confirmed_planted, geocode_attempted, lat, lng FROM tree_requests ORDER BY requested_at DESC',
     );
     client.release();
     return result.rows;
