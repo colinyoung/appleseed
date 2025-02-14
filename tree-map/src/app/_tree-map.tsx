@@ -155,7 +155,7 @@ export default function TreeMap() {
       map,
       markers: markersForClusterer,
       algorithmOptions: {
-        maxZoom: 14,
+        maxZoom: 10,
       },
       renderer: {
         render: ({ count, position }) => {
