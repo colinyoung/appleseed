@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
   env: {
     GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
   },
+  async redirects() {
+    return [
+      {
+        source: '/)',
+        destination: '/',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -1,10 +1,21 @@
 'use client';
 
-import AddTreeRequestForm from './_add-tree-request-form';
-import { ReactElement, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import dynamic from 'next/dynamic';
+import { ReactElement, useCallback, useContext, useEffect, useState } from 'react';
 import { OverrideHTMLInputContextProvider, TreeMapContext } from './_context';
-import { Map as GoogleMap, AdvancedMarker, useMap, Pin } from '@vis.gl/react-google-maps';
+import {
+  Map as GoogleMap,
+  AdvancedMarker,
+  useMap,
+  Pin,
+  useMapsLibrary,
+} from '@vis.gl/react-google-maps';
 import { useIsMobile } from './hooks';
+import { MarkerClusterer } from '@googlemaps/markerclusterer';
+
+const AddTreeRequestForm = dynamic(() => import('./_add-tree-request-form'), {
+  ssr: false,
+});
 
 export default function TreeMap() {
   const mapStyles = {
@@ -19,6 +30,7 @@ export default function TreeMap() {
   };
 
   const map = useMap();
+  const markerLib = useMapsLibrary('marker');
 
   const { markers } = useContext(TreeMapContext);
   const [currentPin, setCurrentPin] = useState<ReactElement | null>(null);
@@ -88,45 +100,115 @@ export default function TreeMap() {
     map?.addListener('contextmenu', reverseGeocode);
   }, [map, reverseGeocode]);
 
-  const renderedMarkers = useMemo(
-    () =>
-      markers.reduce((acc, marker, index) => {
+  const [clusterer, setClusterer] = useState<MarkerClusterer | null>(null);
+
+  const AdvancedMarkerElement = markerLib?.AdvancedMarkerElement;
+
+  useEffect(() => {
+    if (!map) return;
+    if (!markerLib) return;
+    if (!AdvancedMarkerElement) return;
+
+    if (clusterer) {
+      clusterer.clearMarkers();
+    }
+
+    const markersForClusterer = markers
+      .map((marker) => {
         if (marker.latitude && marker.longitude) {
-          acc.push(
-            <AdvancedMarker
-              key={index}
-              position={{
-                lat: marker.latitude,
-                lng: marker.longitude,
-              }}
-            >
-              <Pin background="green" borderColor="white" glyphColor="#fff" glyph="✓" scale={1} />
-            </AdvancedMarker>,
-          );
+          return new AdvancedMarkerElement({
+            position: {
+              lat: marker.latitude,
+              lng: marker.longitude,
+            },
+            title: marker.address,
+            // Use a simple SVG or emoji as content
+            content: new DOMParser().parseFromString(
+              `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="35" viewBox="0 0 21 36" style="fill: green;">
+                <path d="M10 0C4.5 0 0 4.5 0 10c0 7.5 10 25 10 25s10-17.5 10-25c0-5.5-4.5-10-10-10zm0 16c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z" stroke="white" stroke-width="2"/>
+                <text x="10" y="12" text-anchor="middle" font-size="10" alignment-baseline="middle">🌳</text>
+              </svg>`,
+              'text/html',
+            ).body.firstChild as HTMLElement,
+          });
         }
-        // Add white "tree spot" markers
         if (
           typeof marker.lat !== 'undefined' &&
           Number.isFinite(marker.lat) &&
           typeof marker.lng !== 'undefined' &&
           Number.isFinite(marker.lng)
         ) {
-          acc.push(
-            <AdvancedMarker key={index + '-point'} position={{ lat: marker.lat, lng: marker.lng }}>
-              <Pin background="white" borderColor="white" glyph="🌳" scale={1} />
-            </AdvancedMarker>,
-          );
+          return new AdvancedMarkerElement({
+            position: {
+              lat: marker.lat,
+              lng: marker.lng,
+            },
+            title: 'Requested Tree',
+            content: new DOMParser().parseFromString(
+              `<div style="
+                background: white;
+                border: 2px solid white;
+                border-radius: 50%;
+                padding: 8px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              ">🌳</div>`,
+              'text/html',
+            ).body.firstChild as HTMLElement,
+          });
         }
-        return acc;
-      }, [] as ReactElement[]),
-    [markers],
-  );
+        return null;
+      })
+      .filter((marker): marker is google.maps.marker.AdvancedMarkerElement => marker !== null);
+
+    const newClusterer = new MarkerClusterer({
+      map,
+      markers: markersForClusterer,
+      algorithmOptions: {
+        maxZoom: 12,
+      },
+      renderer: {
+        render: ({ count, position }) => {
+          const clusterMarker = new AdvancedMarkerElement({
+            position,
+            content: new DOMParser().parseFromString(
+              `<div style="
+                background: rgba(0, 100, 0, 0.8);
+                border: 2px solid white;
+                border-radius: 50%;
+                padding: 12px;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 14px;
+                font-weight: bold;
+                min-width: 40px;
+                min-height: 40px;
+              ">${count}</div>`,
+              'text/html',
+            ).body.firstChild as HTMLElement,
+          });
+          return clusterMarker;
+        },
+      },
+    });
+
+    if (!clusterer) {
+      setClusterer(newClusterer);
+    }
+
+    return () => {
+      newClusterer.clearMarkers();
+    };
+  }, [map, markers, AdvancedMarkerElement, markerLib, clusterer]);
 
   const isMobile = useIsMobile();
-  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setIsFormVisible(true);
+    setMounted(true);
   }, []);
 
   return (
@@ -141,7 +223,7 @@ export default function TreeMap() {
           defaultCenter={defaultCenter}
           gestureHandling="greedy"
         >
-          {renderedMarkers.concat(currentPin ? [currentPin] : [])}
+          {currentPin}
           {currentXMark && (
             <AdvancedMarker
               key="current-x-mark"
@@ -159,9 +241,7 @@ export default function TreeMap() {
         </GoogleMap>
       )}
       <OverrideHTMLInputContextProvider value={overriddenInputValue}>
-        <div
-          className={`transition-opacity duration-300 ${isFormVisible ? 'opacity-100' : 'opacity-0'}`}
-        >
+        <div className={mounted ? 'opacity-100' : 'opacity-0'}>
           <AddTreeRequestForm
             onPlaceSelected={onPlaceSelectedFromAddress}
             lat={currentXMark?.lat}

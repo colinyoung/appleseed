@@ -40,11 +40,6 @@ async function submitForm(e: React.FormEvent<HTMLFormElement>): Promise<TreeRequ
   return result;
 }
 
-function getInitialTreeCount() {
-  if (typeof window === 'undefined') return 0;
-  return parseInt(localStorage.getItem('treeCount') || '0');
-}
-
 export default function AddTreeRequestForm({
   onPlaceSelected,
   lat,
@@ -55,7 +50,7 @@ export default function AddTreeRequestForm({
   lng?: number;
 }) {
   const [numTrees, setNumTrees] = useState(1);
-  const [treeCount, setTreeCount] = useState(getInitialTreeCount());
+  const [treeCount, setTreeCount] = useState(0);
   const [location, setLocation] = useState('Parkway');
   const [submitting, setSubmitting] = useState(false);
   const { setMarkers } = useContext(TreeMapContext);
@@ -187,6 +182,13 @@ export default function AddTreeRequestForm({
         trackEvent('onboarding_viewed');
       }
       setHasOnboarded(onboardedStatus);
+    }
+  }, []);
+
+  useEffect(() => {
+    const savedCount = localStorage.getItem('treeCount');
+    if (savedCount) {
+      setTreeCount(parseInt(savedCount));
     }
   }, []);
 

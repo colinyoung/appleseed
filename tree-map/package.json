@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@googlemaps/markerclusterer": "^2.5.3",
     "@vis.gl/react-google-maps": "^1.4.2",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
