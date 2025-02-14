@@ -166,6 +166,18 @@ export default function Info() {
           <a href="https://bsky.app/profile/colinyoung.com">Bluesky</a>. Source code is available{' '}
           <a href="https://github.com/colinyoung/appleseed">here</a>.
         </p>
+        <hr />
+        <p>
+          Shovel by Dwi Budiyanto from{' '}
+          <a
+            href="https://thenounproject.com/browse/icons/term/shovel/"
+            target="_blank"
+            title="Shovel Icons"
+          >
+            Noun Project
+          </a>{' '}
+          (CC BY 3.0)
+        </p>
       </div>
     </div>
   );

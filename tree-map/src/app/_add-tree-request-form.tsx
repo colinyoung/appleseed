@@ -330,7 +330,25 @@ export default function AddTreeRequestForm({
             </div>
           )}
           <div className="flex flex-col gap-2 mt-4 border-t border-green-700 pt-2">
-            <p className="mt-2 text-sm text-gray-300 font-bold">Tips:</p>
+            {!isMobile && (
+              <p className="mt-2 text-sm text-gray-300 font-bold mb-3">
+                Key: <span className="text-white bg-[#003000] rounded-full p-1.5">🌳</span> = tree
+                request,{' '}
+                <span className="text-white bg-white rounded-full p-1">
+                  <Image
+                    src="/noun-shovel-7559822.svg"
+                    alt="shovel"
+                    width={16}
+                    height={16}
+                    style={{ display: 'inline' }}
+                  />
+                </span>{' '}
+                ={' '}
+                <abbr title="Positioning the shovel helps train our model to find trees!">
+                  planting location
+                </abbr>
+              </p>
+            )}
             <ul className="text-sm text-gray-300">
               <li className="mb-2">
                 We have some{' '}
@@ -339,11 +357,6 @@ export default function AddTreeRequestForm({
                 </a>
                 .
               </li>
-              {!isMobile && (
-                <li className="mb-2">
-                  Right-click on a tree&apos;s location in the parkway to prefill its address.
-                </li>
-              )}
               <li className="mb-2">
                 • Yes, you can request a tree on a sidewalk, but make sure the sidewalk is wide
                 enough (6 feet). If so, they&apos;ll cut a hole.

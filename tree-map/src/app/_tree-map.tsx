@@ -12,6 +12,8 @@ import {
 } from '@vis.gl/react-google-maps';
 import { useIsMobile } from './hooks';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
+import treePinGreen from './constants/tree-pin-green';
+import treePinWhite from './constants/tree-pin-white';
 
 const AddTreeRequestForm = dynamic(() => import('./_add-tree-request-form'), {
   ssr: false,
@@ -113,54 +115,41 @@ export default function TreeMap() {
       clusterer.clearMarkers();
     }
 
-    const markersForClusterer = markers
-      .map((marker) => {
-        if (marker.latitude && marker.longitude) {
-          return new AdvancedMarkerElement({
+    const markersForClusterer: google.maps.marker.AdvancedMarkerElement[] = [];
+    markers.forEach((marker) => {
+      if (marker.latitude && marker.longitude) {
+        markersForClusterer.push(
+          new AdvancedMarkerElement({
             position: {
               lat: marker.latitude,
               lng: marker.longitude,
             },
             title: marker.address,
-            // Use a simple SVG or emoji as content
-            content: new DOMParser().parseFromString(
-              `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="35" viewBox="0 0 21 36" style="fill: green;">
-                <path d="M10 0C4.5 0 0 4.5 0 10c0 7.5 10 25 10 25s10-17.5 10-25c0-5.5-4.5-10-10-10zm0 16c-3.3 0-6-2.7-6-6s2.7-6 6-6 6 2.7 6 6-2.7 6-6 6z" stroke="white" stroke-width="2"/>
-                <text x="10" y="12" text-anchor="middle" font-size="10" alignment-baseline="middle">🌳</text>
-              </svg>`,
-              'text/html',
-            ).body.firstChild as HTMLElement,
-          });
-        }
-        if (
-          typeof marker.lat !== 'undefined' &&
-          Number.isFinite(marker.lat) &&
-          typeof marker.lng !== 'undefined' &&
-          Number.isFinite(marker.lng)
-        ) {
-          return new AdvancedMarkerElement({
+            content: new DOMParser().parseFromString(treePinGreen, 'text/html').body
+              .firstChild as HTMLElement,
+          }),
+        );
+      }
+      if (
+        typeof marker.lat !== 'undefined' &&
+        Number.isFinite(marker.lat) &&
+        typeof marker.lng !== 'undefined' &&
+        Number.isFinite(marker.lng)
+      ) {
+        console.log('adding tree pin', marker);
+        markersForClusterer.push(
+          new AdvancedMarkerElement({
             position: {
               lat: marker.lat,
               lng: marker.lng,
             },
-            title: 'Requested Tree',
-            content: new DOMParser().parseFromString(
-              `<div style="
-                background: white;
-                border: 2px solid white;
-                border-radius: 50%;
-                padding: 8px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              ">🌳</div>`,
-              'text/html',
-            ).body.firstChild as HTMLElement,
-          });
-        }
-        return null;
-      })
-      .filter((marker): marker is google.maps.marker.AdvancedMarkerElement => marker !== null);
+            title: 'Tree Location',
+            content: new DOMParser().parseFromString(treePinWhite, 'text/html').body
+              .firstChild as HTMLElement,
+          }),
+        );
+      }
+    });
 
     const newClusterer = new MarkerClusterer({
       map,
@@ -174,8 +163,8 @@ export default function TreeMap() {
             position,
             content: new DOMParser().parseFromString(
               `<div style="
-                background: rgba(0, 100, 0, 0.8);
-                border: 2px solid white;
+                background: rgba(0, 70, 0, 0.8);
+                border: 2px solid rgba(0, 20, 0, 0.8);
                 border-radius: 50%;
                 padding: 12px;
                 color: white;
@@ -184,8 +173,8 @@ export default function TreeMap() {
                 justify-content: center;
                 font-size: 14px;
                 font-weight: bold;
-                min-width: 40px;
-                min-height: 40px;
+                width: 40px;
+                height: 40px;
               ">${count}</div>`,
               'text/html',
             ).body.firstChild as HTMLElement,
@@ -229,13 +218,7 @@ export default function TreeMap() {
               key="current-x-mark"
               position={{ lat: currentXMark.lat, lng: currentXMark.lng }}
             >
-              <Pin
-                background="darkgreen"
-                borderColor="green"
-                glyphColor="#fff"
-                glyph="🌳"
-                scale={1}
-              />
+              <div dangerouslySetInnerHTML={{ __html: treePinWhite }} style={{ opacity: 0.7 }} />
             </AdvancedMarker>
           )}
         </GoogleMap>
